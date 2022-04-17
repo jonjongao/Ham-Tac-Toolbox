@@ -163,24 +163,50 @@ public class KeyedObject<T>
 }
 
 [System.Serializable]
-public class KeyedObjects<T>
+public class KeyedObjects<T> : ObservableDictionary<string, T>
 {
     [SerializeField]
-    protected List<KeyedObject<T>> m_values = new List<KeyedObject<T>>();
-    public List<KeyedObject<T>> values => m_values;
-
-    public bool HasKey(string key)
+    protected KeyedObject<T>[] m_values;
+    protected bool m_isInit = false;
+    void Init()
     {
-        foreach (var i in m_values)
-            if (i.key.Equals(key)) return true;
-        return false;
+        if (m_isInit) return;
+        for (int i = 0; i < m_values.Length; i++)
+            this.Add(m_values[i].key, m_values[i].value);
+        m_isInit = true;
     }
 
-    public KeyedObject<T> Find(string key)
+    public new bool ContainsKey(string key)
     {
-        foreach (var i in m_values)
-            if (i.key.Equals(key)) return i;
-        return null;
+        Init();
+        return base.ContainsKey(key);
+    }
+
+    public bool ContainsKey(params string[] keys)
+    {
+        foreach(var k in keys)
+        {
+            if (this.ContainsKey(k) == false) return false;
+        }
+        return true;
+    }
+
+    public new bool ContainsValue(T value)
+    {
+        Init();
+        return base.ContainsValue(value);
+    }
+
+    protected override T GetValue(string key)
+    {
+        Init();
+        return base.GetValue(key);
+    }
+
+    protected override void SetValue(string key, T value)
+    {
+        Init();
+        base.SetValue(key, value);
     }
 }
 
