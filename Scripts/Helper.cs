@@ -42,6 +42,16 @@ static class ExtensionsClass
         return false;
     }
 
+    public static bool Contains(this string[] array, string key)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            if (array[i].Equals(key))
+                return true;
+        }
+        return false;
+    }
+
     public static bool Toggle(this CanvasGroup canvasGroup, bool value)
     {
         canvasGroup.alpha = value ? 1f : 0f;
@@ -184,7 +194,7 @@ public class KeyedObjects<T> : ObservableDictionary<string, T>
 
     public bool ContainsKey(params string[] keys)
     {
-        foreach(var k in keys)
+        foreach (var k in keys)
         {
             if (this.ContainsKey(k) == false) return false;
         }
@@ -216,4 +226,19 @@ public class KeyedUIButton : KeyedElement
     [SerializeField]
     protected Button m_button;
     public Button button => m_button;
+}
+
+public class ValueChangedEvent
+{
+    public ValueChangedEvent(bool isAdd, float prev, float now, float max)
+    {
+        this.isAdd = isAdd;
+        this.prevValue = prev;
+        this.nowValue = now;
+        this.maxValue = max;
+    }
+    public bool isAdd { get; protected set; }
+    public float prevValue { get; protected set; }
+    public float nowValue { get; protected set; }
+    public float maxValue { get; protected set; }
 }
