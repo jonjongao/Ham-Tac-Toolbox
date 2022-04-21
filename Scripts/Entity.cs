@@ -117,5 +117,6 @@ public class Entity : MonoBehaviour,IEntity
 public interface IEntity
 {
     GameObject gameObject { get; }
+   
     bool ContainCategory(string value);
 }

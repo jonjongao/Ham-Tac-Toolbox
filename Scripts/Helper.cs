@@ -9,6 +9,17 @@ static class ExtensionsClass
 {
     private static System.Random rng = new System.Random();
 
+    public static T Last<T>(this IList<T> list)
+    {
+        return list[list.Count - 1];
+    }
+
+    public static T First<T>(this IList<T> list)
+    {
+        return list[0];
+    }
+
+
     public static void Shuffle<T>(this IList<T> list)
     {
         int n = list.Count;
@@ -241,4 +252,9 @@ public class ValueChangedEvent
     public float prevValue { get; protected set; }
     public float nowValue { get; protected set; }
     public float maxValue { get; protected set; }
+}
+
+public interface IBodyParts
+{
+    KeyedObjects<Transform> bodyParts { get; }
 }
