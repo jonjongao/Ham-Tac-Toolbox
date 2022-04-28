@@ -33,6 +33,7 @@ public class TimeoutQueueController : MonoBehaviour
         public float timeout;
         public bool skipable;
         public float timestamp;
+
         public Func<bool> canSkip;
         public TimeoutQueue(UnityAction e, float t, bool s)
         {
@@ -83,9 +84,10 @@ public class TimeoutQueueController : MonoBehaviour
         for (int i = 0; i < m_timeoutQueue.Count; i++)
         {
             m_timeoutQueue[i].timeout -= Time.deltaTime;
-            if (Time.time > (m_timeoutQueue[i].timestamp + minGapDuration) &&
-                m_timeoutQueue[i].timeout <= 0f ||
-                 (m_timeoutQueue[i].skipable && m_timeoutQueue[i].canSkip()))
+            var min = Time.time > (m_timeoutQueue[i].timestamp + minGapDuration);
+            var reached = m_timeoutQueue[i].timeout <= 0f;
+            var skip = m_timeoutQueue[i].skipable && (m_timeoutQueue[i].canSkip == null ? false : m_timeoutQueue[i].canSkip());
+            if (min && (reached || skip))
             {
                 m_timeoutQueue[i].callback.Invoke();
                 m_timeoutQueue[i].FreeCache();

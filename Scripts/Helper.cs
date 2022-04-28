@@ -63,11 +63,18 @@ static class ExtensionsClass
         return false;
     }
 
+    public static bool Toggle(this CanvasGroup group)
+    {
+        group.alpha = group.interactable ? 0f : 1f;
+        group.interactable = group.blocksRaycasts = !group.interactable;
+        return group.interactable;
+    }
+
     public static bool Toggle(this CanvasGroup canvasGroup, bool value)
     {
         canvasGroup.alpha = value ? 1f : 0f;
         canvasGroup.interactable = canvasGroup.blocksRaycasts = value;
-        return value;
+        return canvasGroup.interactable;
     }
 
     public static bool IsOn(this CanvasGroup canvasGroup)
