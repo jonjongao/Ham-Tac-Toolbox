@@ -60,6 +60,11 @@ public class TimeoutQueueController : MonoBehaviour
     List<TimeoutQueue> m_timeoutQueue = new List<TimeoutQueue>();
     const float minGapDuration = 0.25f;
 
+    public static TimeoutQueue OnTimeout(float duration)
+    {
+        return current.AddTimeout(duration, true, null);
+    }
+
     public static TimeoutQueue OnTimeout(float duration, UnityAction callback)
     {
         return current.AddTimeout(duration, true, callback);
