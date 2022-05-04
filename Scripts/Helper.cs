@@ -63,6 +63,16 @@ static class ExtensionsClass
         return false;
     }
 
+    public static bool Contains<T>(this T[] array, T key)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            if (EqualityComparer<T>.Default.Equals(array[i], key))
+                return true;
+        }
+        return false;
+    }
+
     public static bool Toggle(this CanvasGroup group)
     {
         group.alpha = group.interactable ? 0f : 1f;
