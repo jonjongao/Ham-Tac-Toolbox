@@ -51,7 +51,7 @@ public class TimeoutQueueController : MonoBehaviour
 
         public TimeoutQueue CanSkip(Func<bool> func)
         {
-            this.canSkip = func;
+            this.canSkip += func;
             return this;
         }
     }
@@ -60,23 +60,24 @@ public class TimeoutQueueController : MonoBehaviour
     List<TimeoutQueue> m_timeoutQueue = new List<TimeoutQueue>();
     const float minGapDuration = 0.25f;
 
-    public static TimeoutQueue OnTimeout(float duration)
+    public static TimeoutQueue OnTimeout(float duration, string owner = null)
     {
-        return current.AddTimeout(duration, true, null);
+        return current.AddTimeout(duration, true, null, owner);
     }
 
-    public static TimeoutQueue OnTimeout(float duration, UnityAction callback)
+    public static TimeoutQueue OnTimeout(float duration, UnityAction callback, string owner = null)
     {
-        return current.AddTimeout(duration, true, callback);
+        return current.AddTimeout(duration, true, callback, owner);
     }
 
-    public static TimeoutQueue OnTimeout(float duration, bool skipable, UnityAction callback)
+    public static TimeoutQueue OnTimeout(float duration, bool skipable, UnityAction callback, string owner = null)
     {
-        return current.AddTimeout(duration, skipable, callback);
+        return current.AddTimeout(duration, skipable, callback, owner);
     }
 
-    TimeoutQueue AddTimeout(float duration, bool skipable, UnityAction callback)
+    TimeoutQueue AddTimeout(float duration, bool skipable, UnityAction callback, string owner = null)
     {
+        JDebug.Log("Timeout", $"{owner ?? "null"} Add timeout:{duration}s skipable:{skipable} callback:{callback?.Method?.Name ?? "null"}", Extension.Color.pink);
         var t = new TimeoutQueue(callback, duration, skipable);
         m_timeoutQueue.Add(t);
         return t;

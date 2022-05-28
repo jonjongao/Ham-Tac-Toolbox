@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
-static class ExtensionsClass
+static class Extension
 {
     private static System.Random rng = new System.Random();
 
@@ -160,9 +160,28 @@ static class ExtensionsClass
     {
         cells.Shuffle();
 #if UNITY_EDITOR
-        Debug.LogFormat($"<color=red>{cells.Count}</Color>");
+        //Debug.LogFormat($"<color=red>{cells.Count}</Color>");
 #endif
         return cells.GetRange(0, count);
+    }
+
+    public static class Color
+    {
+        public static UnityEngine.Color zinc => new UnityEngine.Color(161f / 255f, 161f / 255f, 170f / 255f);
+        public static UnityEngine.Color neutral => new UnityEngine.Color(163f / 255f, 163f / 255f, 163f / 255f);
+        public static UnityEngine.Color stone => new UnityEngine.Color(168f / 255f, 162f / 255f, 158f / 255f);
+        public static UnityEngine.Color orange => new UnityEngine.Color(251f / 255f, 146f / 255f, 60f / 255f);
+        public static UnityEngine.Color amber => new UnityEngine.Color(251f / 255f, 191f / 255f, 36f / 255f);
+        public static UnityEngine.Color lime => new UnityEngine.Color(163f / 255f, 230f / 255f, 53f / 255f);
+        public static UnityEngine.Color emerald => new UnityEngine.Color(52f / 255f, 211f / 255f, 153f / 255f);
+        public static UnityEngine.Color teal => new UnityEngine.Color(45f / 255f, 212f / 255f, 191f / 255f);
+        public static UnityEngine.Color sky => new UnityEngine.Color(56f / 255f, 189f / 255f, 248f / 255f);
+        public static UnityEngine.Color indigo => new UnityEngine.Color(129f / 255f, 140f / 255f, 248f / 255f);
+        public static UnityEngine.Color violet => new UnityEngine.Color(167f / 255f, 139f / 255f, 250f / 255f);
+        public static UnityEngine.Color purple => new UnityEngine.Color(192f / 255f, 132f / 255f, 252f / 255f);
+        public static UnityEngine.Color fuchsia => new UnityEngine.Color(232f / 255f, 121f / 255f, 249f / 255f);
+        public static UnityEngine.Color pink => new UnityEngine.Color(244f / 255f, 114f / 255f, 182f / 255f);
+        public static UnityEngine.Color rose => new UnityEngine.Color(251f / 255f, 113f / 255f, 133f / 255f);
     }
 }
 
@@ -170,13 +189,21 @@ public static class JDebug
 {
     public static void Log(string context)
     {
-        Log("Default", context, Color.gray);
+        Log("DEF", context, Color.gray);
     }
     public static void Log(string tag, string context, Color color)
     {
         var hex = ColorUtility.ToHtmlStringRGB(color);
-        var b = new StringBuilder($"[{Time.frameCount}][{tag}]<color={hex}>{context}</color>");
+        var b = new StringBuilder($"[{Time.frameCount}][<b><color=white>{tag.ToUpper()}</color></b>]<color=#{hex}>{context}</color>");
         Debug.Log(b);
+    }
+
+    public static string ListToLog<T>(IList<T> list)
+    {
+        var str = string.Empty;
+        foreach (var i in list)
+            str += i.ToString() + ", ";
+        return str;
     }
 }
 

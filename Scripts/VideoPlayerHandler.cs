@@ -52,7 +52,7 @@ public class VideoPlayerHandler : MonoBehaviour
     {
         Debug.Log($"video loop point reached");
         m_canvasGroup.DOFade(0f, 1f);
-        TimeoutQueueController.OnTimeout(1f, OnVideoStop);
+        TimeoutQueueController.OnTimeout(1f, OnVideoStop,"");
     }
 
     void OnVideoStop()

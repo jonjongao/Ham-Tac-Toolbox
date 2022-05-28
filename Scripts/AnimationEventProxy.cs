@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using System;
-public class AnimatorEventHandler : MonoBehaviour
+public class AnimationEventProxy : MonoBehaviour
 {
     public Dictionary<string, UnityAction> eventList = new Dictionary<string, UnityAction>();
 
