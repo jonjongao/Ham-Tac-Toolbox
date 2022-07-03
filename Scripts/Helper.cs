@@ -5,9 +5,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System.Threading;
+using System.Threading.Tasks;
+
 static class Extension
 {
     private static System.Random rng = new System.Random();
+
+    public static bool HasIndex<T>(this IEnumerable<T> list,int index)
+    {
+        if (index < list.Count()) return true;
+        return false;
+    }
+
+    public static T HasIndexElseNull<T>(this IEnumerable<T> list, int index)
+    {
+        if (index < list.Count()) return list.ElementAt(index);
+        return default(T);
+    }
 
     public static T Last<T>(this IList<T> list)
     {
@@ -182,6 +197,40 @@ static class Extension
         public static UnityEngine.Color fuchsia => new UnityEngine.Color(232f / 255f, 121f / 255f, 249f / 255f);
         public static UnityEngine.Color pink => new UnityEngine.Color(244f / 255f, 114f / 255f, 182f / 255f);
         public static UnityEngine.Color rose => new UnityEngine.Color(251f / 255f, 113f / 255f, 133f / 255f);
+    }
+
+    public static class Async
+    {
+        public static async Task Yield(int num)
+        {
+            for (int i = 0; i < num; i++)
+            {
+                await Task.Yield();
+            }
+        }
+
+        public static async Task WaitWhile(Func<bool> condition, int frequencyInFrame = 1, int timeoutInSec = -1)
+        {
+            var waitTask = Task.Run(async () =>
+            {
+                while (condition()) await Yield(frequencyInFrame);
+            });
+
+            if (waitTask != await Task.WhenAny(waitTask, Task.Delay(timeoutInSec)))
+                throw new TimeoutException();
+        }
+
+        public static async Task WaitUntil(Func<bool> condition, int frequencyInFrame = 1, int timeoutInSec = -1)
+        {
+            var waitTask = Task.Run(async () =>
+            {
+                while (!condition()) await Task.Delay(frequencyInFrame);
+            });
+
+            if (waitTask != await Task.WhenAny(waitTask,
+                    Task.Delay(timeoutInSec)))
+                throw new TimeoutException();
+        }
     }
 }
 
