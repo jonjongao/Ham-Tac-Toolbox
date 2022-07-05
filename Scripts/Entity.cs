@@ -24,7 +24,7 @@ public class EntityState : KeyedObject<bool>
     }
 }
 
-public class Entity : MonoBehaviour,IEntity
+public class Entity : MonoBehaviour, IEntity
 {
     [SerializeField]
     bool m_startAsDisable = false;
@@ -109,7 +109,26 @@ public class Entity : MonoBehaviour,IEntity
 
     public bool ContainCategory(string value)
     {
-        return category.Contains(value);
+        try
+        {
+            return category.Contains(value);
+        }
+        catch (System.NullReferenceException)
+        {
+            return false;
+        }
+    }
+
+    public bool ContainCategory(string[] value)
+    {
+        try
+        {
+            return category.Contains(value);
+        }
+        catch (System.NullReferenceException)
+        {
+            return false;
+        }
     }
 }
 
@@ -117,6 +136,7 @@ public class Entity : MonoBehaviour,IEntity
 public interface IEntity
 {
     GameObject gameObject { get; }
-   
+
     bool ContainCategory(string value);
+    bool ContainCategory(string[] value);
 }

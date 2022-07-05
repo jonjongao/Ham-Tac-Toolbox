@@ -12,7 +12,7 @@ static class Extension
 {
     private static System.Random rng = new System.Random();
 
-    public static bool HasIndex<T>(this IEnumerable<T> list,int index)
+    public static bool HasIndex<T>(this IEnumerable<T> list, int index)
     {
         if (index < list.Count()) return true;
         return false;
@@ -73,6 +73,16 @@ static class Extension
         for (int i = 0; i < array.Length; i++)
         {
             if (array[i].Equals(key))
+                return true;
+        }
+        return false;
+    }
+
+    public static bool Contains(this string[] array, string[] keys)
+    {
+        foreach (var i in keys)
+        {
+            if (array.Contains(i))
                 return true;
         }
         return false;
