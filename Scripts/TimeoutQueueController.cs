@@ -95,7 +95,7 @@ public class TimeoutQueueController : MonoBehaviour
             var skip = m_timeoutQueue[i].skipable && (m_timeoutQueue[i].canSkip == null ? false : m_timeoutQueue[i].canSkip());
             if (min && (reached || skip))
             {
-                m_timeoutQueue[i].callback.Invoke();
+                m_timeoutQueue[i].callback?.Invoke();
                 m_timeoutQueue[i].FreeCache();
                 m_timeoutQueue.RemoveAt(i);
                 break;

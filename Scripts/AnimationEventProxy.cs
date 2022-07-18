@@ -7,12 +7,17 @@ public class AnimationEventProxy : MonoBehaviour
 {
     public Dictionary<string, UnityAction> eventList = new Dictionary<string, UnityAction>();
 
+    public bool HasEvent(string key)
+    {
+        return eventList.ContainsKey(key);
+    }
+
     public void RegistEvent(string key, UnityAction callback)
     {
         if (eventList == null) eventList = new Dictionary<string, UnityAction>();
         if (eventList.ContainsKey(key))
         {
-            eventList[key] = callback;
+            eventList[key] += callback;
         }
         else
         {
@@ -34,7 +39,7 @@ public class AnimationEventProxy : MonoBehaviour
         if (eventList == null) eventList = new Dictionary<string, UnityAction>();
         if (eventList.ContainsKey(key))
         {
-            eventList[key].Invoke();
+            eventList[key]?.Invoke();
         }
         else
         {
