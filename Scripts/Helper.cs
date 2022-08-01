@@ -134,6 +134,14 @@ static class Extension
             return "{" + string.Join(", ", dict.Select(kvp => kvp.Key.ToString() + ":" + kvp.Value.ToString()).ToArray()) + "}";
     }
 
+    public static bool ToBool(this string a)
+    {
+        if (a.Equals("true") || a.Equals("1"))
+            return true;
+        else
+            return false;
+    }
+
     public static Bounds EncapsulateAll(this Bounds[] array)
     {
         var b = new Bounds(array[0].center, array[0].size);
@@ -242,6 +250,25 @@ static class Extension
                     Task.Delay(timeoutInSec)))
                 throw new TimeoutException();
         }
+
+        public static async void WaitInTimeSkipable(float duration,Func<bool> condition,Action callback=null)
+        {
+            await WaitInTimeSkipableAsync(duration, condition);
+            JDebug.Log($"AAAAAAAAAAAAAAAAAAAAAAA11", "SUCCESSS", Color.orange);
+            callback?.Invoke();
+        }
+
+        public static async Task WaitInTimeSkipableAsync(float duration, Func<bool> condition)
+        {
+            var timestamp = Time.time;
+            while (Time.time - timestamp < duration)
+            {
+                if (Time.time - timestamp > 0.25f && condition()) break;
+                await Task.Yield();
+            }
+            JDebug.Log($"AAAAAAAAAAAAAAAAAAAAAAA22", "SUCCESSS", Color.orange);
+            await Task.Yield();
+        }
     }
 }
 
@@ -260,6 +287,7 @@ public static class JDebug
 
     public static string ListToLog<T>(IList<T> list)
     {
+        if (list == null) return "Null";
         var str = string.Empty;
         foreach (var i in list)
             str += i.ToString() + ", ";
@@ -275,6 +303,10 @@ public class KeyedElement
     public string key => m_key;
 }
 
+/// <summary>
+/// Soft key relation
+/// </summary>
+/// <typeparam name="T"></typeparam>
 [System.Serializable]
 public class KeyedObject<T>
 {
@@ -287,6 +319,10 @@ public class KeyedObject<T>
     public T value => m_value;
 }
 
+/// <summary>
+/// Inherit from dictionary, cannot have duplicate key
+/// </summary>
+/// <typeparam name="T"></typeparam>
 [System.Serializable]
 public class KeyedObjects<T> : ObservableDictionary<string, T>
 {

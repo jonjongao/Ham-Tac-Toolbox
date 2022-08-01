@@ -24,7 +24,8 @@ public class VideoPlayerHandler : MonoBehaviour
 
     private void Awake()
     {
-        all.Add(m_key, this);
+        if (all.ContainsKey(m_key) == false)
+            all.Add(m_key, this);
         m_player = GetComponent<VideoPlayer>();
         m_rawImage = GetComponent<RawImage>();
         m_canvasGroup = GetComponent<CanvasGroup>();
@@ -41,7 +42,7 @@ public class VideoPlayerHandler : MonoBehaviour
     private void Update()
     {
         var near = m_startTimestamp + m_player.clip.length - 0.5f;
-        if(m_hasStart && Time.time>near && m_audioFade==null)
+        if (m_hasStart && Time.time > near && m_audioFade == null)
         {
             m_audio.DOFade(0f, 1f);
         }
@@ -72,7 +73,7 @@ public class VideoPlayerHandler : MonoBehaviour
     {
         Debug.Log($"video loop point reached");
         m_canvasGroup.DOFade(0f, 1f);
-        TimeoutQueueController.OnTimeout(1f, OnVideoStop,"");
+        TimeoutQueueController.OnTimeout(1f, OnVideoStop, "");
     }
 
     void OnVideoStop()

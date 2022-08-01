@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 public static class DebugMenu
 {
     static RectTransform root;
@@ -22,7 +23,7 @@ public static class DebugMenu
     {
         list[key].group.Toggle(show);
     }
-   
+
     public static void OnUpdate(UnityAction callback)
     {
         updateHook += callback;
@@ -114,5 +115,18 @@ public static class DebugMenu
         script.size = size;
         script.text = label;
         script.OnClick += callback;
+    }
+
+    public static void SetResolution(Vector2Int resolution)
+    {
+        if (root == null)
+        {
+            Debug.LogWarningFormat("Root is not init yet");
+            return;
+        }
+        var scaler = root.GetComponentInParent<CanvasScaler>();
+        if (scaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = resolution;
     }
 }
