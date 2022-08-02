@@ -18,7 +18,6 @@ public class BundleVersionChecker
 
     static BundleVersionChecker()
     {
-        AssetDatabase.DeleteAsset(GameSettingModel.settingFilePath);
         string lastVersion = CurrentBundleVersion.version;
         var timeMark = System.DateTime.Now.ToString("yyMMddHH");
         /*

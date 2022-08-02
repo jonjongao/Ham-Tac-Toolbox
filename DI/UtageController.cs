@@ -30,6 +30,18 @@ public class UtageController : MonoBehaviour, IDialogController
     protected bool m_isPlaying;
     public bool IS_PLAYING => current.m_isPlaying;
 
+    [SerializeField]
+    string m_startScenario;
+
+    private void Start()
+    {
+        if (string.IsNullOrEmpty(m_startScenario) == false)
+        {
+            Initialize();
+            StartDialog(m_startScenario, null);
+        }
+    }
+
     public void Initialize()
     {
         m_engine = FindObjectOfType<AdvEngine>();
@@ -67,6 +79,7 @@ public class UtageController : MonoBehaviour, IDialogController
         else
             m_engine.StartGame(id);
         m_engine.Config.IsSkip = false;
+        JDebug.Log($"Try start dialog:{id}");
 
 
         var tcs = new TaskCompletionSource<bool>();
