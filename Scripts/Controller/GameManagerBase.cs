@@ -5,6 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
+using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace HamTac
 {
@@ -23,6 +27,9 @@ namespace HamTac
             set => m_current = value;
         }
 
+        [SerializeField]
+        Canvas m_globalOverlayCanvas;
+        public Canvas globalOverlayCanvas { get => m_globalOverlayCanvas; set => m_globalOverlayCanvas = value; }
 
         [SerializeField]
         Camera m_globalCamera;
@@ -51,7 +58,9 @@ namespace HamTac
         public static bool HAS_LMB;
 
         [SerializeField]
-        LoadingScreen m_loadingScreen;
+        protected LoadingScreen m_loadingScreen;
+        [SerializeField]
+        protected GameObject m_bootScreen;
 
         protected virtual void Awake()
         {
@@ -145,4 +154,17 @@ namespace HamTac
         }
 
     }
+
+#if UNITY_EDITOR
+    [CustomEditor(typeof(GameManagerBase), true)]
+    public class GameManagerBaseEditor : Editor
+    {
+        GameManagerBase current;
+
+        private void OnEnable()
+        {
+            current = (GameManagerBase)target;
+        }
+    }
+#endif
 }
