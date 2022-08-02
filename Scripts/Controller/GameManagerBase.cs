@@ -23,7 +23,7 @@ namespace HamTac
             set => m_current = value;
         }
 
-       
+
         [SerializeField]
         Camera m_globalCamera;
         public Camera globalCamera => m_globalCamera;
@@ -50,15 +50,18 @@ namespace HamTac
 
         public static bool HAS_LMB;
 
+        [SerializeField]
+        LoadingScreen m_loadingScreen;
+
         protected virtual void Awake()
         {
             SetFreeze(false);
         }
 
-        protected virtual void OnDestroy()        {                    }
+        protected virtual void OnDestroy() { }
 
 
-        protected virtual void Start()        {                    }
+        protected virtual void Start() { }
 
         protected virtual void Update()
         {
@@ -100,8 +103,7 @@ namespace HamTac
 
         async Task<bool> OnSceneLoading(AsyncOperation op, bool showProgressBar, float min = 0f, float max = 1f)
         {
-            var l = FindObjectOfType<LoadingScreen>();
-            l.handler.Toggle(true);
+            m_loadingScreen.gameObject.SetActive(true);
             float beginTime = Time.time;
             float minDuration = 1f;
 #if UNITY_EDITOR
@@ -110,7 +112,7 @@ namespace HamTac
             {
                 var n = (Time.time - beginTime) / minDuration;
                 if (showProgressBar)
-                    l.SetProgress(min + (n * (max - min)));
+                    m_loadingScreen.SetProgress(min + (n * (max - min)));
                 if (n >= 1f && op.progress >= 0.9f)
                     break;
                 await Task.Yield();
@@ -120,14 +122,14 @@ namespace HamTac
         {
             JDebug.Log($"Progress:{op.progress}");
             if (showProgressBar)
-                l.SetProgress(min + (op.progress * (max - min)));
+                m_loadingScreen.SetProgress(min + (op.progress * (max - min)));
             if (op.progress >= 0.9f)
                 break;
             await Task.Yield();
         }
         await Task.Delay(Mathf.CeilToInt(minDuration * 1000));
 #endif
-            l.handler.Toggle(false);
+            m_loadingScreen.gameObject.SetActive(false);
             return true;
         }
 

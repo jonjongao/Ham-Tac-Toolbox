@@ -1,30 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LoadingScreen : MonoBehaviour
 {
-    UIEventHandler m_handler;
-    public UIEventHandler handler => m_handler;
+    CanvasGroup m_group;
     [SerializeField]
     ProgressBar m_progressBar;
 
     private void Awake()
     {
-        m_handler = GetComponent<UIEventHandler>();
-        //m_handler.Toggle(false);
-        m_handler.IsOn.AddListener(On);
-        m_handler.IsOff.AddListener(Off);
+        m_group = GetComponent<CanvasGroup>();
     }
 
-    void On()
+    private void OnEnable()
     {
-
+        SetProgress(0f);
+        m_group.Toggle(true);
     }
 
-    void Off()
+    private void OnDisable()
     {
-        //m_progressBar.gameObject.SetActive(false);
+        m_group.Toggle(false);
     }
 
     public void SetProgress(float value)
