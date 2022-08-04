@@ -112,7 +112,8 @@ namespace HamTac
 
         async Task<bool> OnSceneLoading(AsyncOperation op, bool showProgressBar, float min = 0f, float max = 1f)
         {
-            m_loadingScreen.gameObject.SetActive(true);
+            if(m_loadingScreen)
+                m_loadingScreen.gameObject.SetActive(true);
             float beginTime = Time.time;
             float minDuration = 1f;
 #if UNITY_EDITOR
@@ -120,7 +121,7 @@ namespace HamTac
             while (true)
             {
                 var n = (Time.time - beginTime) / minDuration;
-                if (showProgressBar)
+                if (showProgressBar && m_loadingScreen)
                     m_loadingScreen.SetProgress(min + (n * (max - min)));
                 if (n >= 1f && op.progress >= 0.9f)
                     break;
@@ -130,7 +131,7 @@ namespace HamTac
         while(true)
         {
             JDebug.Log($"Progress:{op.progress}");
-            if (showProgressBar)
+            if (showProgressBar && m_loadingScreen)
                 m_loadingScreen.SetProgress(min + (op.progress * (max - min)));
             if (op.progress >= 0.9f)
                 break;
@@ -138,7 +139,8 @@ namespace HamTac
         }
         await Task.Delay(Mathf.CeilToInt(minDuration * 1000));
 #endif
-            m_loadingScreen.gameObject.SetActive(false);
+            if(m_loadingScreen)
+                m_loadingScreen.gameObject.SetActive(false);
             return true;
         }
 

@@ -7,6 +7,9 @@ using System.Linq;
 using UnityEngine.UI;
 using System.Threading;
 using System.Threading.Tasks;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 static class Extension
 {
@@ -199,6 +202,36 @@ static class Extension
         return cells.GetRange(0, count);
     }
 
+    public static Vector2[] GetPoints(this BoxCollider2D box, bool includeWorldPosition)
+    {
+        Vector3 worldPosition = includeWorldPosition ? box.bounds.center : Vector3.zero;
+        Vector2 size = new Vector2(box.size.x * box.transform.localScale.x * 0.5f,
+            box.size.y * box.transform.localScale.y * 0.5f);
+        Vector3 corner1 = new Vector2(-size.x, -size.y);
+        Vector3 corner2 = new Vector2(-size.x, size.y);
+        Vector3 corner3 = new Vector2(size.x, -size.y);
+        Vector3 corner4 = new Vector2(size.x, size.y);
+        corner1 = worldPosition + corner1;
+        corner2 = worldPosition + corner2;
+        corner3 = worldPosition + corner3;
+        corner4 = worldPosition + corner4;
+
+        return new Vector2[]
+        {
+            corner1,corner3,corner4,corner2
+        };
+    }
+
+    [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
+    static void GetSpriteRendererSizeAsColliderSize(MenuCommand menuCommand)
+    {
+        var collider2d = (BoxCollider2D)menuCommand.context;
+
+        var sprite = collider2d.GetComponent<SpriteRenderer>();
+        if (sprite == null) return;
+        collider2d.size = sprite.size;
+    }
+
     public static class Color
     {
         public static UnityEngine.Color zinc => new UnityEngine.Color(161f / 255f, 161f / 255f, 170f / 255f);
@@ -230,28 +263,27 @@ static class Extension
 
         public static async Task WaitWhile(Func<bool> condition, int frequencyInFrame = 1, int timeoutInSec = -1)
         {
-            var waitTask = Task.Run(async () =>
+            var begin = Time.time;
+            while (condition())
             {
-                while (condition()) await Yield(frequencyInFrame);
-            });
-
-            if (waitTask != await Task.WhenAny(waitTask, Task.Delay(timeoutInSec)))
-                throw new TimeoutException();
+                if (timeoutInSec > 0f && Time.time - begin > timeoutInSec)
+                    break;
+                await Task.Delay(frequencyInFrame);
+            }
         }
 
-        public static async Task WaitUntil(Func<bool> condition, int frequencyInFrame = 1, int timeoutInSec = -1)
+        public static async Task WaitUntil(Func<bool> condition, int frequencyInFrame = 100, int timeoutInSec = -1)
         {
-            var waitTask = Task.Run(async () =>
+            var begin = Time.time;
+            while (!condition())
             {
-                while (!condition()) await Task.Delay(frequencyInFrame);
-            });
-
-            if (waitTask != await Task.WhenAny(waitTask,
-                    Task.Delay(timeoutInSec)))
-                throw new TimeoutException();
+                if (timeoutInSec > 0f && Time.time - begin > timeoutInSec)
+                    break;
+                await Task.Delay(frequencyInFrame);
+            }
         }
 
-        public static async void WaitInTimeSkipable(float duration,Func<bool> condition,Action callback=null)
+        public static async void WaitInTimeSkipable(float duration, Func<bool> condition, Action callback = null)
         {
             await WaitInTimeSkipableAsync(duration, condition);
             JDebug.Log($"AAAAAAAAAAAAAAAAAAAAAAA11", "SUCCESSS", Color.orange);

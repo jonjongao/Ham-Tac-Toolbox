@@ -5,6 +5,7 @@ using UnityEngine.Events;
 using System.Threading;
 using System.Threading.Tasks;
 using Utage;
+using HamTac;
 
 public class UtageController : MonoBehaviour, IDialogController
 {
@@ -29,6 +30,8 @@ public class UtageController : MonoBehaviour, IDialogController
     [SerializeField]
     protected bool m_isPlaying;
     public bool IS_PLAYING => current.m_isPlaying;
+
+    public bool IS_INITIALIZED => current.m_engine != null;
 
     [SerializeField]
     string m_startScenario;
@@ -61,7 +64,7 @@ public class UtageController : MonoBehaviour, IDialogController
 
     public void OnDialogEnd()
     {
-        JDebug.Log("Utage",$"OnDialogEnd",Extension.Color.zinc);
+        JDebug.Log("Utage", $"OnDialogEnd", Extension.Color.zinc);
         //!Unfreeze game
         OnChange?.Invoke(IDialogController.Callback.DialogEnd);
         m_isPlaying = false;
