@@ -7,24 +7,27 @@ using System.Linq;
 using UnityEditor;
 #endif
 
-public class AssetLookupTable<T> : ScriptableObject
+namespace HamTac
 {
-    [SerializeField]
-    string m_ID;
-    public string ID => m_ID;
-
-    public List<KeyedObject<T>> assets = new List<KeyedObject<T>>();
-
-    public T FindByKey(string value)
+    public class AssetLookupTable<T> : ScriptableObject
     {
-        try
+        [SerializeField]
+        string m_ID;
+        public string ID => m_ID;
+
+        public List<KeyedObject<T>> assets = new List<KeyedObject<T>>();
+
+        public T FindByKey(string value)
         {
-            var obj = assets.Find(x => x.key.Equals(value)).value;
-            return obj;
-        }
-        catch (System.NullReferenceException)
-        {
-            return (T)new object();
+            try
+            {
+                var obj = assets.Find(x => x.key.Equals(value)).value;
+                return obj;
+            }
+            catch (System.NullReferenceException)
+            {
+                return (T)new object();
+            }
         }
     }
 }

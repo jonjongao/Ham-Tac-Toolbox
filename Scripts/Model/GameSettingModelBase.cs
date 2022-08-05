@@ -6,16 +6,16 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-public class GameSettingModel
+public class GameSettingModelBase
 {
-    static GameSettingModel m_current;
-    public static GameSettingModel current
+    static GameSettingModelBase m_current;
+    public static GameSettingModelBase current
     {
         get
         {
             if (m_current == null)
             {
-                m_current = new GameSettingModel();
+                m_current = new GameSettingModelBase();
             }
             return m_current;
         }

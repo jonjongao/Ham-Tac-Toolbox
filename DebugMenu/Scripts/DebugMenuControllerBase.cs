@@ -3,34 +3,38 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-public class DebugMenuControllerBase : MonoBehaviour
+
+namespace HamTac
 {
-    protected Canvas m_canvas;
-    public Canvas canvas => m_canvas;
-
-    private void Start()
+    public class DebugMenuControllerBase : MonoBehaviour
     {
-        Init();
-    }
+        protected Canvas m_canvas;
+        public Canvas canvas => m_canvas;
 
-    private void Update()
-    {
-        DebugMenu.Update();
-    }
+        private void Start()
+        {
+            Init();
+        }
 
-    void Init()
-    {
-        m_canvas = GetComponentInChildren<Canvas>() ?? DebugMenu.BeginCanvas(transform).GetComponentInChildren<Canvas>();
+        private void Update()
+        {
+            DebugMenu.Update();
+        }
 
-        DebugMenu.Init(m_canvas);
+        void Init()
+        {
+            m_canvas = GetComponentInChildren<Canvas>() ?? DebugMenu.BeginCanvas(transform).GetComponentInChildren<Canvas>();
 
-        CreateMenu();
-    }
+            DebugMenu.Init(m_canvas);
 
-    protected virtual void CreateMenu() { }
+            CreateMenu();
+        }
 
-    private void OnDestroy()
-    {
-        DebugMenu.Destroy();
+        protected virtual void CreateMenu() { }
+
+        private void OnDestroy()
+        {
+            DebugMenu.Destroy();
+        }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace HacTac
+namespace HamTac
 {
     public class EntityState : KeyedObject<bool>
     {

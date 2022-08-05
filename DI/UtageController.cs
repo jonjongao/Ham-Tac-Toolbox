@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Utage;
 using HamTac;
 
-public class UtageController : MonoBehaviour, IDialogController
+public class UtageController : MonoBehaviour
 {
     static UtageController m_current;
     public static UtageController current
@@ -25,7 +25,7 @@ public class UtageController : MonoBehaviour, IDialogController
     [SerializeField]
     AdvEngine m_engine;
 
-    public event UnityAction<IDialogController.Callback> OnChange;
+    public event UnityAction<Callback> OnChange;
 
     [SerializeField]
     protected bool m_isPlaying;
@@ -58,7 +58,7 @@ public class UtageController : MonoBehaviour, IDialogController
         JDebug.Log("Utage", $"OnDialogBegin", Extension.Color.zinc);
         RefreshGraphicManagerSortingLayer("UI");
         //!Freeze game
-        OnChange?.Invoke(IDialogController.Callback.DialogBegin);
+        OnChange?.Invoke(Callback.DialogBegin);
         m_isPlaying = true;
     }
 
@@ -66,7 +66,7 @@ public class UtageController : MonoBehaviour, IDialogController
     {
         JDebug.Log("Utage", $"OnDialogEnd", Extension.Color.zinc);
         //!Unfreeze game
-        OnChange?.Invoke(IDialogController.Callback.DialogEnd);
+        OnChange?.Invoke(Callback.DialogEnd);
         m_isPlaying = false;
     }
 
@@ -94,7 +94,7 @@ public class UtageController : MonoBehaviour, IDialogController
     public void StopDialog()
     {
         m_engine.EndScenario();
-        OnChange?.Invoke(IDialogController.Callback.DialogStop);
+        OnChange?.Invoke(Callback.DialogStop);
         m_isPlaying = false;
     }
 
@@ -114,5 +114,10 @@ public class UtageController : MonoBehaviour, IDialogController
     public async void ForcedStartDialog(string id, UnityAction onComplete)
     {
         await StartDialogAsync(id, true, onComplete);
+    }
+
+    public enum Callback
+    {
+        DialogBegin, DialogEnd, DialogStop
     }
 }
