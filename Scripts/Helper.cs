@@ -222,6 +222,8 @@ static class Extension
         };
     }
 
+
+#if UNITY_EDITOR
     [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
     static void GetSpriteRendererSizeAsColliderSize(MenuCommand menuCommand)
     {
@@ -231,6 +233,7 @@ static class Extension
         if (sprite == null) return;
         collider2d.size = sprite.size;
     }
+#endif
 
     public static class Color
     {
