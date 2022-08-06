@@ -224,6 +224,74 @@ namespace HamTac
             };
         }
 
+        public static async Task OptimizedTakeScreenshotAsync(this MonoBehaviour component, TextureEncode encode, int quality, float scaling, string savePathIncludeExtension)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            component.StartCoroutine(TakeScreenshot(encode, quality, scaling, savePathIncludeExtension, () => tcs.SetResult(true)));
+            await tcs.Task;
+        }
+
+        public enum TextureEncode
+        {
+            JPG, PNG
+        }
+
+        static IEnumerator TakeScreenshot(TextureEncode encode, int quality, float scaling, string savePathIncludeExtension, System.Action callback)
+        {
+            yield return new WaitForEndOfFrame();
+            var texture = ScreenCapture.CaptureScreenshotAsTexture();
+            var rendered = new Texture2D(texture.width, texture.height);
+            rendered.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
+            rendered.Apply();
+
+            if (scaling < 1f || scaling > 1f)
+                ResizeTexture2D(rendered, Mathf.CeilToInt(texture.width * scaling), Mathf.CeilToInt(texture.height * scaling), false);
+
+            byte[] byteArray = new byte[0];
+            switch (encode)
+            {
+                case TextureEncode.PNG:
+                    byteArray = rendered.EncodeToPNG();
+                    break;
+                case TextureEncode.JPG:
+                default:
+                    byteArray = rendered.EncodeToJPG(quality);
+                    break;
+            }
+            System.IO.File.WriteAllBytes(savePathIncludeExtension, byteArray);
+            Debug.Log($"SaveScrenshot:{savePathIncludeExtension}");
+            callback?.Invoke();
+        }
+
+        public static void ResizeTexture2D(Texture2D texture2D, int targetX, int targetY, bool mipmap = true, FilterMode filter = FilterMode.Bilinear)
+        {
+            //create a temporary RenderTexture with the target size
+            RenderTexture rt = RenderTexture.GetTemporary(targetX, targetY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+
+            //set the active RenderTexture to the temporary texture so we can read from it
+            RenderTexture.active = rt;
+
+            //Copy the texture data on the GPU - this is where the magic happens [(;]
+            Graphics.Blit(texture2D, rt);
+            //resize the texture to the target values (this sets the pixel data as undefined)
+            texture2D.Reinitialize(targetX, targetY, texture2D.format, mipmap);
+            texture2D.filterMode = filter;
+
+            try
+            {
+                //reads the pixel values from the temporary RenderTexture onto the resized texture
+                texture2D.ReadPixels(new Rect(0.0f, 0.0f, targetX, targetY), 0, 0);
+                //actually upload the changed pixels to the graphics card
+                texture2D.Apply();
+            }
+            catch
+            {
+                Debug.LogError("Read/Write is not enabled on texture " + texture2D.name);
+            }
+
+
+            RenderTexture.ReleaseTemporary(rt);
+        }
 
 #if UNITY_EDITOR
         [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
