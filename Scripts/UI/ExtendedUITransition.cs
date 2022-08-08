@@ -19,6 +19,16 @@ public class ExtendedUITransition : UIBehaviour, ISelectHandler, IDeselectHandle
     public Color selectColor = Color.white;
     public Color deselectColor = Color.gray;
 
+    protected override void OnEnable()
+    {
+        DoDeselect();
+    }
+
+    protected override void OnDisable()
+    {
+        DoDeselect();
+    }
+
     public void OnToggle(bool value)
     {
         if (value) DoSelect();

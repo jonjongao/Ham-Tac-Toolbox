@@ -123,5 +123,55 @@ public class UtageController : MonoBehaviour
     {
         DialogBegin, DialogEnd, DialogStop
     }
+
+    public async void SetParameter(string key, object value)
+    {
+        await Extension.Async.WaitWhile(() => m_engine == null, 60);
+
+        var success = m_engine.Param.TrySetParameter(key, value);
+        if (success)
+            JDebug.Log($"Success set utage param, key:{key} value:{value}");
+        else
+            JDebug.Log($"Try set utage param failed, key:{key} value:{value}");
+    }
+
+    public T GetParameter<T>(string key) where T : System.IEquatable<bool>, System.IEquatable<int>, System.IEquatable<float>, System.IEquatable<string>
+    {
+        //if (typeof(T) != typeof(bool) ||
+        //    typeof(T) != typeof(string) ||
+        //    typeof(T) != typeof(int) ||
+        //    typeof(T) != typeof(float)) throw null;
+        var obj = m_engine.Param.GetParameter<T>(key);
+        if (obj != null)
+            JDebug.Log($"Success get utage param, key:{key} value:{obj}");
+        else
+            JDebug.Log($"Try get utage param failed, key:{key}");
+        return obj;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="tblKey">Example: ParamTbl{}</param>
+    /// <returns></returns>
+    public AdvParamStructTbl GetStructTable(string tblKey)
+    {
+        var tbl = m_engine.Param.StructTbl[tblKey];
+        return tbl;
+    }
+
+    public void SetStructTableParameter(string tblKey, string rowKey, string colKey, object value)
+    {
+        //ParamTbl[E5S001].flag
+        var path = $"{tblKey}[{rowKey}].{colKey}";
+        SetParameter(path, value);
+    }
+
+    public T GetStructTableParameter<T>(string tblKey, string rowKey, string colKey, object value) where T : System.IEquatable<bool>, System.IEquatable<int>, System.IEquatable<float>, System.IEquatable<string>
+    {
+        //ParamTbl[E5S001].flag
+        var path = $"{tblKey}[{rowKey}].{colKey}";
+        return GetParameter<T>(path);
+    }
 #endif
 }

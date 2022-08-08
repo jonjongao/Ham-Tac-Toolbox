@@ -17,6 +17,15 @@ namespace HamTac
     {
         private static System.Random rng = new System.Random();
 
+        public static int IndexOf<T>(this T[] array, T value)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i].Equals(value)) return i;
+            }
+            throw null;
+        }
+
         public static bool HasIndex<T>(this IEnumerable<T> list, int index)
         {
             if (index < list.Count()) return true;
@@ -306,6 +315,50 @@ namespace HamTac
             var sprite = collider2d.GetComponent<SpriteRenderer>();
             if (sprite == null) return;
             collider2d.size = sprite.size;
+        }
+
+        [MenuItem("Tools/HacTac/Add Utage define symbol")]
+        public static void AddUtageDefineSymbol()
+        {
+            AddDefineSymbols(new string[] { "UTAGE_INSTALLED" });
+        }
+
+        [MenuItem("Tools/HacTac/Remove Utage define symbol")]
+        public static void RemoveUtageDefineSymbol()
+        {
+            RemoveDefineSymbols(new string[] { "UTAGE_INSTALLED" });
+        }
+
+        [MenuItem("Tools/HacTac/Add DoTween define symbol")]
+        public static void AddDoTweenDefineSymbol()
+        {
+            AddDefineSymbols(new string[] { "DOTWEEN_INSTALLED" });
+        }
+
+        [MenuItem("Tools/HacTac/Remove DoTween define symbol")]
+        public static void RemoveDoTweenDefineSymbol()
+        {
+            RemoveDefineSymbols(new string[] { "DOTWEEN_INSTALLED" });
+        }
+
+        static void AddDefineSymbols(string[] symbols)
+        {
+            string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            List<string> allDefines = definesString.Split(';').ToList();
+            allDefines.AddRange(symbols.Except(allDefines));
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(
+                EditorUserBuildSettings.selectedBuildTargetGroup,
+                string.Join(";", allDefines.ToArray()));
+        }
+
+        static void RemoveDefineSymbols(string[] symbols)
+        {
+            string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            List<string> allDefines = definesString.Split(';').ToList();
+            allDefines.RemoveAll(x => symbols.Contains(x));
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(
+                EditorUserBuildSettings.selectedBuildTargetGroup,
+                string.Join(";", allDefines.ToArray()));
         }
 #endif
 
