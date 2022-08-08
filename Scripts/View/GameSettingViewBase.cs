@@ -73,17 +73,17 @@ namespace HamTac
 
         void OnMasterVolChange(float value)
         {
-            AudioController.SetVolume(AudioChannel.Master, value);
+            AudioControllerBase.SetVolume(AudioChannel.Master, value);
         }
 
         void OnBgmVolChange(float value)
         {
-            AudioController.SetVolume(AudioChannel.BGM, value);
+            AudioControllerBase.SetVolume(AudioChannel.BGM, value);
         }
 
         void OnSfxVolChange(float value)
         {
-            AudioController.SetVolume(AudioChannel.SFX, value);
+            AudioControllerBase.SetVolume(AudioChannel.SFX, value);
         }
 
 

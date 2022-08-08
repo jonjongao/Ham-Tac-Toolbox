@@ -4,7 +4,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Video;
 using UnityEngine.UI;
+#if DOTWEEN_INSTALLED
 using DG.Tweening;
+#endif
 
 namespace HamTac
 {
@@ -40,15 +42,21 @@ namespace HamTac
             m_canvasGroup.Toggle(false);
         }
 
+#if DOTWEEN_INSTALLED
         Tweener m_audioFade;
+#endif
 
         private void Update()
         {
             var near = m_startTimestamp + m_player.clip.length - 0.5f;
+#if DOTWEEN_INSTALLED
             if (m_hasStart && Time.time > near && m_audioFade == null)
             {
                 m_audio.DOFade(0f, 1f);
             }
+#else
+            m_audio.volume = 0f;
+#endif
         }
 
         public void PlayClip(VideoClip clip, UnityAction onComplete = null)
@@ -75,17 +83,23 @@ namespace HamTac
         private void M_player_loopPointReached(VideoPlayer source)
         {
             Debug.Log($"video loop point reached");
+#if DOTWEEN_INSTALLED
             m_canvasGroup.DOFade(0f, 1f);
+#else
+            m_canvasGroup.Toggle(false);
+#endif
             TimeoutQueueController.OnTimeout(1f, OnVideoStop, "");
         }
 
         void OnVideoStop()
         {
             m_hasStart = false;
+#if DOTWEEN_INSTALLED
             m_audioFade = null;
             m_audio.DOKill(true);
-            m_audio.volume = m_audioDefaultVolume;
             m_canvasGroup.DOKill();
+#endif
+            m_audio.volume = m_audioDefaultVolume;
             m_canvasGroup.Toggle(false);
             OnComplete?.Invoke();
         }

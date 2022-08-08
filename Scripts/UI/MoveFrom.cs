@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if DOTWEEN_INSTALLED
 using DG.Tweening;
+#endif
 using UnityEngine.UI;
 
 public class MoveFrom : MonoBehaviour
@@ -15,7 +17,9 @@ public class MoveFrom : MonoBehaviour
     [SerializeField]
     bool m_stopOnAwake = true;
 
+#if DOTWEEN_INSTALLED
     Sequence m_seq;
+#endif
     RectTransform rectTransform => transform as RectTransform;
 
     private void Awake()
@@ -27,6 +31,7 @@ public class MoveFrom : MonoBehaviour
 
     public void Play()
     {
+#if DOTWEEN_INSTALLED
         if (m_seq == null)
         {
             m_seq = DOTween.Sequence();
@@ -36,12 +41,15 @@ public class MoveFrom : MonoBehaviour
         }
         else
             m_seq.Restart();
+#endif
     }
 
     public void Stop()
     {
+#if DOTWEEN_INSTALLED
         if (m_seq != null && m_seq.IsPlaying())
             m_seq.Complete();
+#endif
         rectTransform.anchoredPosition = relativedFrom;
     }
 

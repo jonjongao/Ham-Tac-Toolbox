@@ -4,11 +4,14 @@ using UnityEngine;
 using UnityEngine.Events;
 using System.Threading;
 using System.Threading.Tasks;
+#if UTAGE_INSTALLED
 using Utage;
+#endif
 using HamTac;
 
 public class UtageController : MonoBehaviour
 {
+#if UTAGE_INSTALLED
     static UtageController m_current;
     public static UtageController current
     {
@@ -120,4 +123,5 @@ public class UtageController : MonoBehaviour
     {
         DialogBegin, DialogEnd, DialogStop
     }
+#endif
 }

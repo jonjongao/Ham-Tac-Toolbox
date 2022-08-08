@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+#if DOTWEEN_INSTALLED
 using DG.Tweening;
+#endif
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -222,10 +224,13 @@ namespace HamTac
                 if (t.isBusy)
                 {
                     //Debug.LogWarningFormat("<color=red>Forced stop BGM easing</color>");
+#if DOTWEEN_INSTALLED
                     t.source.DOKill(true);
+#endif
                 }
                 t.isBusy = true;
                 //Debug.LogWarningFormat("<color=red>Channel [{0}] is busy:{1}</color>", t.type, t.isBusy);
+#if DOTWEEN_INSTALLED
                 var s = DOTween.Sequence();
                 s.Append(t.source.DOFade(0f, 0.5f).SetSpeedBased(true));
                 s.AppendCallback(() =>
@@ -238,7 +243,8 @@ namespace HamTac
                 {
                     t.isBusy = false;
                 //Debug.LogWarningFormat("<color=red>2:Channel [{0}] is busy:{1}</color>", t.type, t.isBusy);
-            });
+                });
+#endif
                 //t.clip = clip;
                 //t.Play();
             }

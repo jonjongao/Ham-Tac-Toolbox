@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
-using DG.Tweening;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif

@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UTAGE_INSTALLED
 using Utage;
+#endif
 using UnityEngine.UI;
 using System.Linq;
 
@@ -9,6 +11,7 @@ namespace HamTac
 {
     public class GraphicManagerHelper : MonoBehaviour
     {
+#if UTAGE_INSTALLED
         AdvGraphicManager m_manager;
         [SerializeField]
         Material m_rawImageMaterial;
@@ -53,6 +56,6 @@ namespace HamTac
             }
         }
 
-
+#endif
     }
 }
