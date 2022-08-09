@@ -213,6 +213,16 @@ namespace HamTac
             return cells.GetRange(0, count);
         }
 
+        public static T RandomTake<T>(this T[] array)
+        {
+            return array[UnityEngine.Random.Range(0, array.Length)];
+        }
+
+        public static T RandomTake<T>(this IEnumerable<T> list)
+        {
+            return list.ElementAt(UnityEngine.Random.Range(0, list.Count()));
+        }
+
         public static Vector2[] GetPoints(this BoxCollider2D box, bool includeWorldPosition)
         {
             Vector3 worldPosition = includeWorldPosition ? box.bounds.center : Vector3.zero;
@@ -430,6 +440,11 @@ namespace HamTac
                 }
                 JDebug.Log($"AAAAAAAAAAAAAAAAAAAAAAA22", "SUCCESSS", Color.orange);
                 await Task.Yield();
+            }
+
+            public static async Task Delay(float seconds)
+            {
+                await Task.Delay(Mathf.CeilToInt(seconds * 1000));
             }
         }
     }
