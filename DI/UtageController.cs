@@ -173,5 +173,10 @@ public class UtageController : MonoBehaviour
         var path = $"{tblKey}[{rowKey}].{colKey}";
         return GetParameter<T>(path);
     }
+#else
+    public bool IS_PLAYING => false;
+    public bool IS_INITIALIZED => true;
+    public void Initialize() { }
+    public async void StartDialog(string id, UnityAction onComplete) { }
 #endif
 }
