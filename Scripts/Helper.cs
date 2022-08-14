@@ -26,6 +26,18 @@ namespace HamTac
             throw null;
         }
 
+        public static int IndexOf<T>(this IEnumerable source, T value)
+        {
+            int index = 0;
+            var comparer = EqualityComparer<T>.Default; // or pass in as a parameter
+            foreach (T item in source)
+            {
+                if (comparer.Equals(item, value)) return index;
+                index++;
+            }
+            return -1;
+        }
+
         public static bool HasIndex<T>(this IEnumerable<T> list, int index)
         {
             if (index < list.Count()) return true;
@@ -447,6 +459,8 @@ namespace HamTac
                 await Task.Delay(Mathf.CeilToInt(seconds * 1000));
             }
         }
+        
+
     }
 
 

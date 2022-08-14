@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Linq;
+using HamTac;
 
 public class ExtendedToggleGroup : ToggleGroup
 {
@@ -13,6 +14,7 @@ public class ExtendedToggleGroup : ToggleGroup
     int m_selectedIndex;
     public int selectedIndex => m_selectedIndex;
 
+
     protected override void Awake()
     {
         m_Toggles = GetComponentsInChildren<Toggle>().ToList();
@@ -21,30 +23,43 @@ public class ExtendedToggleGroup : ToggleGroup
 
     protected override void OnEnable()
     {
+        m_Toggles = GetComponentsInChildren<Toggle>().ToList();
+        Debug.Log($"toggle on enable:{m_Toggles.Count}");
         for (int i = 0; i < m_Toggles.Count; i++)
         {
             if (i == m_selectIndexOnEnable)
+            {
+                Debug.Log($"select index:{i} name:{m_Toggles[i].name}");
                 m_Toggles[i].isOn = true;
+            }
             else
                 m_Toggles[i].isOn = false;
             m_Toggles[i].onValueChanged.AddListener(OnAnyToggleValueChanged);
             m_Toggles[i].onValueChanged?.Invoke(m_Toggles[i].isOn);
+           
         }
         base.OnEnable();
     }
 
     protected override void OnDisable()
     {
+        m_Toggles = GetComponentsInChildren<Toggle>().ToList();
+        Debug.Log($"toggle on disable:{m_Toggles.Count}");
         foreach (var i in m_Toggles)
+        {
             i.onValueChanged.RemoveListener(OnAnyToggleValueChanged);
+            i.isOn = false;
+        }
         base.OnDisable();
     }
 
     void OnAnyToggleValueChanged(bool value)
     {
+
         var obj = GetFirstActiveToggle();
         var index = m_Toggles.IndexOf(obj);
         m_selectedIndex = index;
+        Debug.Log($"any value change:{index}");
         OnSelected?.Invoke(obj);
     }
 

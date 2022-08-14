@@ -51,7 +51,8 @@ namespace HamTac
         public static bool IS_PAUSE => current.m_isPause;
 
         [SerializeField]
-        public string m_currentScene;
+        protected string m_currentScene;
+        public string currentScene => m_currentScene;
 
         public static void SetFreeze(bool value) { current.m_isFreeze = value; JDebug.Log($"Freeze", $"Set freeze:{value}", Color.red); }
 

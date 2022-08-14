@@ -12,21 +12,27 @@ public class ExtendedUITransition : UIBehaviour, ISelectHandler, IDeselectHandle
     Graphic[] m_spriteSwapTargets;
     [SerializeField]
     Graphic[] m_colorTintTargets;
+    [SerializeField]
+    Graphic[] m_alphaTargets;
     [Header("SpriteSwap")]
     public Sprite selectSprite;
     public Sprite deselectSprite;
     [Header("ColorTint")]
     public Color selectColor = Color.white;
     public Color deselectColor = Color.gray;
+    [Header("Alpha")]
+    public float selectAlpha = 1f;
+    public float deselectAlpha = 0f;
 
     protected override void OnEnable()
     {
-        DoDeselect();
+       
     }
 
     protected override void OnDisable()
     {
         DoDeselect();
+
     }
 
     public void OnToggle(bool value)
@@ -37,7 +43,6 @@ public class ExtendedUITransition : UIBehaviour, ISelectHandler, IDeselectHandle
 
     public void DoSelect()
     {
-        //m_targetGraphic.sprite = selectSprite;
         foreach (var i in m_spriteSwapTargets)
         {
             if (i is Image)
@@ -47,15 +52,16 @@ public class ExtendedUITransition : UIBehaviour, ISelectHandler, IDeselectHandle
         {
             i.CrossFadeColor(selectColor, 0f, true, false);
         }
+        foreach (var i in m_alphaTargets)
+        {
+            i.CrossFadeAlpha(selectAlpha, 0f, true);
+        }
     }
 
     public void DoDeselect()
     {
-        //m_targetGraphic.sprite = deselectSprite;
         foreach (var i in m_spriteSwapTargets)
         {
-            JDebug.Log($"on deselect:{i.name}");
-
             if (i is Image)
                 (i as Image).sprite = deselectSprite;
         }
@@ -63,8 +69,11 @@ public class ExtendedUITransition : UIBehaviour, ISelectHandler, IDeselectHandle
         {
             i.CrossFadeColor(deselectColor, 0f, true, false);
         }
+        foreach (var i in m_alphaTargets)
+        {
+            i.CrossFadeAlpha(deselectAlpha, 0f, true);
+        }
     }
-
 
     public void OnSelect(BaseEventData eventData)
     {
