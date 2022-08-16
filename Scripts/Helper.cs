@@ -328,6 +328,11 @@ namespace HamTac
             RenderTexture.ReleaseTemporary(rt);
         }
 
+        public static bool IsInLayerMask(this GameObject obj, LayerMask layerMask)
+        {
+            return ((layerMask.value & (1 << obj.layer)) > 0);
+        }
+
 #if UNITY_EDITOR
         [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
         static void GetSpriteRendererSizeAsColliderSize(MenuCommand menuCommand)
@@ -336,7 +341,27 @@ namespace HamTac
 
             var sprite = collider2d.GetComponent<SpriteRenderer>();
             if (sprite == null) return;
+            Debug.Log($"pivot:{sprite.sprite.pivot} rect:{sprite.sprite.rect} " +
+                $"toffset:{sprite.sprite.textureRectOffset} bounds:{sprite.sprite.bounds}");
+            var pivot = new Vector2(Mathf.Clamp01(sprite.sprite.pivot.x / sprite.sprite.rect.width),
+                                    Mathf.Clamp01(sprite.sprite.pivot.y / sprite.sprite.rect.height));
+
+            var offsetX = (sprite.size.x * 0.5f) - (pivot.x * sprite.size.x);
+            var offsetY = (sprite.size.y * 0.5f) - (pivot.y * sprite.size.y);
+            Debug.Log($"pivot:{pivot} x:{offsetX} y:{offsetY}");
+            collider2d.offset = new Vector2(offsetX, offsetY);
             collider2d.size = sprite.size;
+        }
+
+        [MenuItem("CONTEXT/BoxCollider2D/Use MeshFilter size", false, 3)]
+        static void GetMeshFilterSizeAsColliderSize(MenuCommand menuCommand)
+        {
+            var collider2d = (BoxCollider2D)menuCommand.context;
+
+            var sprite = collider2d.GetComponent<MeshRenderer>();
+            if (sprite == null) return;
+            collider2d.size = sprite.bounds.size;
+            Debug.Log($"get mesh size:{sprite.bounds.size}");
         }
 
         [MenuItem("Tools/HacTac/Add Utage define symbol")]
@@ -459,7 +484,7 @@ namespace HamTac
                 await Task.Delay(Mathf.CeilToInt(seconds * 1000));
             }
         }
-        
+
 
     }
 
