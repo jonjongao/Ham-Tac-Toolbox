@@ -75,6 +75,7 @@ public class UtageController : MonoBehaviour
 
     public async void StartDialog(string id, UnityAction onComplete)
     {
+        JDebug.Log($"Try StartDialog:{id}");
         await StartDialogAsync(id, false, onComplete);
     }
 
@@ -91,7 +92,7 @@ public class UtageController : MonoBehaviour
         else
             m_engine.StartGame(id);
         m_engine.Config.IsSkip = false;
-        JDebug.Log($"Try start dialog:{id}");
+        JDebug.Log($"Try StartDialogAsync:{id}");
 
 
         var tcs = new TaskCompletionSource<bool>();

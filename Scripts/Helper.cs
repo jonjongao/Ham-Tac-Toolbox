@@ -333,6 +333,11 @@ namespace HamTac
             return ((layerMask.value & (1 << obj.layer)) > 0);
         }
 
+        public static Vector3 ToV3(this Vector2 value)
+        {
+            return new Vector3(value.x, value.y, 0f);
+        }
+
 #if UNITY_EDITOR
         [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
         static void GetSpriteRendererSizeAsColliderSize(MenuCommand menuCommand)
