@@ -345,6 +345,29 @@ namespace HamTac
             return v;
         }
 
+        public static int PickInRatio(float[] ratios, bool includeNoPick)
+        {
+            //todo例如30%+60&+100%(皆無) = 190%
+            var sum = ratios.Sum() + (includeNoPick ? 1f : 0f);
+            for (int i = 0; i < ratios.Length; i++)
+            {
+                var d = UnityEngine.Random.Range(0f, sum);
+                //todo0~190隨機數，若小於30%則中
+                if (d < ratios[i])
+                {
+                    return i;
+                }
+                //todo沒中則從池中扣除30%，池會越來越小
+                //todo即會傾向越來越容易中，如果在[includeNoPick]模式，最終機率最大為皆沒中
+                else
+                {
+                    sum -= ratios[i];
+                }
+            }
+            //todo-1=皆沒中
+            return -1;
+        }
+
 #if UNITY_EDITOR
         [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
         static void GetSpriteRendererSizeAsColliderSize(MenuCommand menuCommand)
@@ -491,28 +514,7 @@ namespace HamTac
                 await Task.Yield();
             }
 
-            public static int PickInRatio(float[] ratios, bool includeNoPick)
-            {
-                //todo例如30%+60&+100%(皆無) = 190%
-                var sum = ratios.Sum() + (includeNoPick ? 1f : 0f);
-                for (int i = 0; i < ratios.Length; i++)
-                {
-                    var d = UnityEngine.Random.Range(0f, sum);
-                    //todo0~190隨機數，若小於30%則中
-                    if (d < ratios[i])
-                    {
-                        return i;
-                    }
-                    //todo沒中則從池中扣除30%，池會越來越小
-                    //todo即會傾向越來越容易中，如果在[includeNoPick]模式，最終機率最大為皆沒中
-                    else
-                    {
-                        sum -= ratios[i];
-                    }
-                }
-                //todo-1=皆沒中
-                return -1;
-            }
+         
 
             public static async Task Delay(float seconds)
             {
