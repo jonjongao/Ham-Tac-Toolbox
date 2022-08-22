@@ -32,8 +32,23 @@ namespace HamTac
         public Canvas globalOverlayCanvas { get => m_globalOverlayCanvas; set => m_globalOverlayCanvas = value; }
 
         [SerializeField]
+        Canvas m_activeCameraCanvas;
+        public Canvas activeCameraCanvas { get => m_activeCameraCanvas; set => m_activeCameraCanvas = value; }
+
+        [SerializeField]
         Camera m_globalCamera;
         public Camera globalCamera => m_globalCamera;
+        [SerializeField]
+        Camera m_activeCamera;
+        public Camera activeCamera
+        {
+            get => m_activeCamera ?? m_globalCamera;
+            set
+            {
+                m_activeCamera = value;
+                activeCameraCanvas.worldCamera = m_activeCamera;
+            }
+        }
 
         [SerializeField]
         protected bool m_isFreeze;
@@ -66,6 +81,7 @@ namespace HamTac
         protected virtual void Awake()
         {
             SetFreeze(false);
+            activeCamera = m_globalCamera;
         }
 
         protected virtual void OnDestroy() { }
@@ -113,7 +129,7 @@ namespace HamTac
 
         async Task<bool> OnSceneLoading(AsyncOperation op, bool showProgressBar, float min = 0f, float max = 1f)
         {
-            if(m_loadingScreen)
+            if (m_loadingScreen)
                 m_loadingScreen.gameObject.SetActive(true);
             float beginTime = Time.time;
             float minDuration = 1f;
@@ -140,7 +156,7 @@ namespace HamTac
         }
         await Task.Delay(Mathf.CeilToInt(minDuration * 1000));
 #endif
-            if(m_loadingScreen)
+            if (m_loadingScreen)
                 m_loadingScreen.gameObject.SetActive(false);
             return true;
         }

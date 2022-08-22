@@ -338,6 +338,13 @@ namespace HamTac
             return new Vector3(value.x, value.y, 0f);
         }
 
+        public static int ToInt(this string value)
+        {
+            var v = 0;
+            int.TryParse(value, out v);
+            return v;
+        }
+
 #if UNITY_EDITOR
         [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
         static void GetSpriteRendererSizeAsColliderSize(MenuCommand menuCommand)

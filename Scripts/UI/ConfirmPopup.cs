@@ -109,9 +109,10 @@ public class ConfirmPopup : MonoBehaviour
             }
         }
         m_group.gameObject.SetActive(true);
-        await Task.Yield();
+        await Extension.Async.Yield(15);
         var height = m_contextText.rectTransform.sizeDelta.y +
             m_buttonGroup.sizeDelta.y + m_bottomMargin;
+        JDebug.Log($"Calc Popup window height:{m_contextText.rectTransform.sizeDelta.y}+{m_buttonGroup.sizeDelta.y}+{m_bottomMargin} on {gameObject.name}");
         var size = m_window.sizeDelta;
         size.y = height;
         m_window.sizeDelta = size;

@@ -61,16 +61,16 @@ public class UtageController : MonoBehaviour
         JDebug.Log("Utage", $"OnDialogBegin", Extension.Color.zinc);
         RefreshGraphicManagerSortingLayer("UI");
         //!Freeze game
-        OnChange?.Invoke(Callback.DialogBegin);
         m_isPlaying = true;
+        OnChange?.Invoke(Callback.DialogBegin);
     }
 
     public void OnDialogEnd()
     {
         JDebug.Log("Utage", $"OnDialogEnd", Extension.Color.zinc);
         //!Unfreeze game
-        OnChange?.Invoke(Callback.DialogEnd);
         m_isPlaying = false;
+        OnChange?.Invoke(Callback.DialogEnd);
     }
 
     public async void StartDialog(string id, UnityAction onComplete)
@@ -217,4 +217,11 @@ public class UtageController : MonoBehaviour
     public void Initialize() { }
     public async void StartDialog(string id, UnityAction onComplete) { }
 #endif
+
+    public void AllGraphicOff()
+    {
+        m_engine.GraphicManager.BgManager.FadeOutAll(m_engine.Page.ToSkippedTime(0.2f));
+        m_engine.GraphicManager.SpriteManager.FadeOutAll(m_engine.Page.ToSkippedTime(0.2f));
+        m_engine.GraphicManager.CharacterManager.FadeOutAll(m_engine.Page.ToSkippedTime(0.2f));
+    }
 }
