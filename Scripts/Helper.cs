@@ -514,7 +514,7 @@ namespace HamTac
                 await Task.Yield();
             }
 
-         
+
 
             public static async Task Delay(float seconds)
             {
@@ -527,12 +527,12 @@ namespace HamTac
                 }
             }
 
-            public static async Task Delay(GameObject owner, float seconds)
+            public static async Task Delay(float seconds, System.Func<bool> breaker)
             {
                 var begin = Time.time;
                 while (Time.time - begin < seconds)
                 {
-                    if (Application.isPlaying == false || owner.activeSelf == false)
+                    if (Application.isPlaying == false || breaker())
                         break;
                     await Task.Yield();
                 }
