@@ -498,7 +498,6 @@ namespace HamTac
             public static async void WaitInTimeSkipable(float duration, Func<bool> condition, Action callback = null)
             {
                 await WaitInTimeSkipableAsync(duration, condition);
-                JDebug.Log($"AAAAAAAAAAAAAAAAAAAAAAA11", "SUCCESSS", Color.orange);
                 callback?.Invoke();
             }
 
@@ -510,7 +509,6 @@ namespace HamTac
                     if (Time.time - timestamp > 0.25f && condition()) break;
                     await Task.Yield();
                 }
-                JDebug.Log($"AAAAAAAAAAAAAAAAAAAAAAA22", "SUCCESSS", Color.orange);
                 await Task.Yield();
             }
 
@@ -642,20 +640,112 @@ namespace HamTac
         public float nowValue { get; protected set; }
         public float maxValue { get; protected set; }
     }
+
+    /// <summary>
+    /// Soft key relation
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    [System.Serializable]
+    public class KeyedObject<T1,T2>
+    {
+        [SerializeField]
+        protected T1 m_key;
+        public T1 key => m_key;
+
+        [SerializeField]
+        protected T2 m_value;
+        public T2 value => m_value;
+    }
+
+    /// <summary>
+    /// Inherit from dictionary, cannot have duplicate key
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    [System.Serializable]
+    public class KeyedObjects<T1, T2> : ObservableDictionary<T1, T2>
+    {
+        [SerializeField]
+        protected KeyedObject<T1,T2>[] m_values;
+        protected bool m_isInit = false;
+        void Init()
+        {
+            if (m_isInit) return;
+            for (int i = 0; i < m_values.Length; i++)
+                this.Add(m_values[i].key, m_values[i].value);
+            m_isInit = true;
+        }
+
+        public new bool ContainsKey(T1 key)
+        {
+            Init();
+            return base.ContainsKey(key);
+        }
+
+        public bool ContainsKey(params T1[] keys)
+        {
+            foreach (var k in keys)
+            {
+                if (this.ContainsKey(k) == false) return false;
+            }
+            return true;
+        }
+
+        public new bool ContainsValue(T2 value)
+        {
+            Init();
+            return base.ContainsValue(value);
+        }
+
+        protected override T2 GetValue(T1 key)
+        {
+            Init();
+            return base.GetValue(key);
+        }
+
+        protected override void SetValue(T1 key, T2 value)
+        {
+            Init();
+            base.SetValue(key, value);
+        }
+    }
+
 }
 
 public static class JDebug
 {
+    public static void Q(string context)
+    {
+        Log(0, string.Empty, context, HamTac.Extension.Color.neutral);
+    }
+    public static void W(string context)
+    {
+        Log(1, string.Empty, context, Color.yellow);
+    }
+    public static void E(string context)
+    {
+        Log(2, string.Empty, context, Color.red);
+    }
+
     public static void Log(string context)
     {
-        Log("DEF", context, Color.gray);
+        Log(0, string.Empty, context, Color.gray);
     }
-    public static void Log(string tag, string context, Color color)
+    public static void Log(string tag, string context, Color color) { Log(0, tag, context, color); }
+    public static void Log(int type, string tag, string context, Color color)
     {
         var hex = ColorUtility.ToHtmlStringRGB(color);
         var b = new StringBuilder($"[{Time.frameCount}][<b><color=white>{tag.ToUpper()}</color></b>]<color=#{hex}>{context}</color>");
-        Debug.Log(b);
+        switch (type)
+        {
+            case 1:
+                Debug.LogWarning(b); break;
+            case 2:
+                Debug.LogError(b); break;
+            default:
+                Debug.Log(b); break;
+        }
     }
+
 
     public static string ListToLog<T>(IList<T> list)
     {
