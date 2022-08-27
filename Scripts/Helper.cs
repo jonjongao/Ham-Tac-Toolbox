@@ -345,6 +345,11 @@ namespace HamTac
             return v;
         }
 
+        public static int Repeat(this int value,int length)
+        {
+            return value > length ? 0 : value;
+        }
+
         public static int PickInRatio(float[] ratios, bool includeNoPick)
         {
             //todo例如30%+60&+100%(皆無) = 190%
@@ -490,6 +495,19 @@ namespace HamTac
                 while (!condition())
                 {
                     if (timeoutInSec > 0f && Time.time - begin > timeoutInSec)
+                        break;
+                    await Task.Delay(frequencyInFrame);
+                }
+            }
+
+            public static async Task WaitUntil(Func<bool>condition,Func<bool> breaker, int frequencyInFrame = 100, int timeoutInSec = -1)
+            {
+                var begin = Time.time;
+                while (!condition())
+                {
+                    if (timeoutInSec > 0f && Time.time - begin > timeoutInSec)
+                        break;
+                    if (Application.isPlaying == false || breaker())
                         break;
                     await Task.Delay(frequencyInFrame);
                 }
