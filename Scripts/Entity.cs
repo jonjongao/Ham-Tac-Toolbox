@@ -14,7 +14,7 @@ namespace HamTac
         public string guid => m_guid;
         public Vector3 worldPosition => m_worldPosition;
 
-        public EntityState(string guid, Vector3 pos)
+        public EntityState(string guid, Vector3 pos):base(guid)
         {
             m_guid = guid;
             m_worldPosition = pos;

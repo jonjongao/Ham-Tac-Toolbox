@@ -345,7 +345,7 @@ namespace HamTac
             return v;
         }
 
-        public static int Repeat(this int value,int length)
+        public static int Repeat(this int value, int length)
         {
             return value > length ? 0 : value;
         }
@@ -500,7 +500,7 @@ namespace HamTac
                 }
             }
 
-            public static async Task WaitUntil(Func<bool>condition,Func<bool> breaker, int frequencyInFrame = 100, int timeoutInSec = -1)
+            public static async Task WaitUntil(Func<bool> condition, Func<bool> breaker, int frequencyInFrame = 100, int timeoutInSec = -1)
             {
                 var begin = Time.time;
                 while (!condition())
@@ -582,6 +582,17 @@ namespace HamTac
         [SerializeField]
         protected T m_value;
         public T value => m_value;
+
+        public KeyedObject(string key)
+        {
+            this.m_key = key;
+        }
+
+        public KeyedObject(string key, T value)
+        {
+            this.m_key = key;
+            this.m_value = value;
+        }
     }
 
     /// <summary>
@@ -597,8 +608,21 @@ namespace HamTac
         void Init()
         {
             if (m_isInit) return;
-            for (int i = 0; i < m_values.Length; i++)
-                this.Add(m_values[i].key, m_values[i].value);
+            //!Possible this dictionary was construct in script
+            if (m_values == null)
+            {
+                List<KeyedObject<T>> list = new List<KeyedObject<T>>();
+                foreach (var i in this)
+                {
+                    list.Add(new KeyedObject<T>(i.Key, i.Value));
+                }
+                m_values = list.ToArray();
+            }
+            else
+            {
+                for (int i = 0; i < m_values.Length; i++)
+                    this.Add(m_values[i].key, m_values[i].value);
+            }
             m_isInit = true;
         }
 
@@ -664,7 +688,7 @@ namespace HamTac
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [System.Serializable]
-    public class KeyedObject<T1,T2>
+    public class KeyedObject<T1, T2>
     {
         [SerializeField]
         protected T1 m_key;
@@ -683,7 +707,7 @@ namespace HamTac
     public class KeyedObjects<T1, T2> : ObservableDictionary<T1, T2>
     {
         [SerializeField]
-        protected KeyedObject<T1,T2>[] m_values;
+        protected KeyedObject<T1, T2>[] m_values;
         protected bool m_isInit = false;
         void Init()
         {
