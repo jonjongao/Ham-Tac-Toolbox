@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+#if TextMeshPro
 using TMPro;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 using HamTac;
@@ -21,7 +23,7 @@ public class ConfirmPopup : MonoBehaviour
     [SerializeField]
     protected RectTransform m_window;
     [SerializeField]
-    protected TextMeshProUGUI m_contextText;
+    protected Graphic m_contextText;
     [SerializeField]
     protected RectTransform m_buttonGroup;
     [SerializeField]
@@ -70,7 +72,7 @@ public class ConfirmPopup : MonoBehaviour
 
     protected virtual void OnEnable()
     {
-        
+
     }
 
     protected virtual void OnDisable()
@@ -96,22 +98,48 @@ public class ConfirmPopup : MonoBehaviour
         JDebug.Log($"Select index:{m_selectedIndex} on popup:{gameObject.name}");
     }
 
+    public virtual async Task<int> Initialize(string context, System.Action<int> callback, params string[] options)
+    {
+        return await Initialize(new string[] { context }, options, callback);
+    }
+
     public virtual async Task<int> Initialize(string[] context, string[] options, System.Action<int> callback = null)
     {
-        m_contextText.text = context[0];
+        var yMargin = 0f;
+        var xMargin = 0f;
+        if (m_contextText is Text)
+        {
+            (m_contextText as Text).text = context[0];
+            yMargin = 20f;
+            xMargin = 20f;
+            m_contextText.rectTransform.anchoredPosition = new Vector2(m_contextText.rectTransform.anchoredPosition.x, -yMargin);
+            m_contextText.rectTransform.sizeDelta = new Vector2(-xMargin * 2f, m_contextText.rectTransform.sizeDelta.y);
+        }
+#if TextMeshPro
+        else if (m_contextText is TMPro.TextMeshProUGUI)
+            (m_contextText as TMPro.TextMeshProUGUI).text = context[0];
+#endif
         for (int i = 0; i < m_buttonsTemplate.Length; i++)
         {
             m_buttonsTemplate[i].gameObject.SetActive(i < options.Length);
             if (i < options.Length)
             {
-                var t = m_buttonsTemplate[i].GetComponentInChildren<TextMeshProUGUI>();
-                if (t) t.text = options[i];
+#if TextMeshPro
+                var a = m_buttonsTemplate[i].GetComponentInChildren<TMPro.TextMeshProUGUI>();
+                if (a)
+                {
+                    a.text = options[i];
+                    continue;
+                }
+#endif
+                var b = m_buttonsTemplate[i].GetComponentInChildren<Text>();
+                if (b) b.text = options[i];
             }
         }
         m_group.gameObject.SetActive(true);
         await Extension.Async.Yield(15);
         var height = m_contextText.rectTransform.sizeDelta.y +
-            m_buttonGroup.sizeDelta.y + m_bottomMargin;
+            m_buttonGroup.sizeDelta.y + m_bottomMargin + (yMargin * 2f);
         JDebug.Log($"Calc Popup window height:{m_contextText.rectTransform.sizeDelta.y}+{m_buttonGroup.sizeDelta.y}+{m_bottomMargin} on {gameObject.name}");
         var size = m_window.sizeDelta;
         size.y = height;

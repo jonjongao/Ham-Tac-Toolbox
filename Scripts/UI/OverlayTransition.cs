@@ -19,6 +19,18 @@ public class OverlayTransition : MonoBehaviour
     [SerializeField]
     protected bool m_isPlaying;
     public bool isPlaying => m_isPlaying;
+    
+    public static bool AnyTransitionIsPlaying
+    {
+        get
+        {
+            foreach(var i in m_instance)
+            {
+                if (i.Value.isPlaying) return true;
+            }
+            return false;
+        }
+    }
 
     protected virtual void Awake()
     {
