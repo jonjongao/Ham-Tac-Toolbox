@@ -69,7 +69,7 @@ namespace HamTac
             }
         }
 
-      protected  Dictionary<string, float> m_oneShotHistory = new Dictionary<string, float>();
+        protected Dictionary<string, float> m_oneShotHistory = new Dictionary<string, float>();
 
         [SerializeField] protected string m_playingBGM;
 
@@ -195,6 +195,11 @@ namespace HamTac
         public static void PlayClip(AudioChannel target, AudioClip clip) { PlayClip(target, clip, false); }
         public static void PlayClip(AudioChannel target, AudioClip clip, bool isLoop)
         {
+            if (clip == null)
+            {
+                Debug.LogError($"Try PlayClip but clip is null");
+                return;
+            }
             var t = GetChannel(target);
             t.source.loop = isLoop;
             if (target == AudioChannel.SFX && isLoop == false)
@@ -242,7 +247,7 @@ namespace HamTac
                 s.AppendCallback(() =>
                 {
                     t.isBusy = false;
-                //Debug.LogWarningFormat("<color=red>2:Channel [{0}] is busy:{1}</color>", t.type, t.isBusy);
+                    //Debug.LogWarningFormat("<color=red>2:Channel [{0}] is busy:{1}</color>", t.type, t.isBusy);
                 });
 #endif
                 //t.clip = clip;

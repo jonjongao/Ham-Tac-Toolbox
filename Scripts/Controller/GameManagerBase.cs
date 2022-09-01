@@ -66,6 +66,10 @@ namespace HamTac
         public static bool IS_PAUSE => current.m_isPause;
 
         [SerializeField]
+        protected bool m_isLoading;
+        public static bool IS_LOADING => current.m_isLoading;
+
+        [SerializeField]
         protected string m_currentScene;
         public string currentScene => m_currentScene;
 

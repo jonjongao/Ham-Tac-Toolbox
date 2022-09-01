@@ -415,7 +415,7 @@ namespace HamTac
         {
             RemoveDefineSymbols(new string[] { "UTAGE_INSTALLED" });
         }
-
+        
         [MenuItem("Tools/HacTac/Add DoTween define symbol")]
         public static void AddDoTweenDefineSymbol()
         {
@@ -426,6 +426,18 @@ namespace HamTac
         public static void RemoveDoTweenDefineSymbol()
         {
             RemoveDefineSymbols(new string[] { "DOTWEEN_INSTALLED" });
+        }
+
+        [MenuItem("Tools/HacTac/Add TMP define symbol")]
+        public static void AddTMPDefineSymbol()
+        {
+            AddDefineSymbols(new string[] { "TextMeshPro" });
+        }
+
+        [MenuItem("Tools/HacTac/Remove TMP define symbol")]
+        public static void RemoveTMPDefineSymbol()
+        {
+            RemoveDefineSymbols(new string[] { "TextMeshPro" });
         }
 
         static void AddDefineSymbols(string[] symbols)
@@ -491,13 +503,7 @@ namespace HamTac
 
             public static async Task WaitUntil(Func<bool> condition, int frequencyInFrame = 100, int timeoutInSec = -1)
             {
-                var begin = Time.time;
-                while (!condition())
-                {
-                    if (timeoutInSec > 0f && Time.time - begin > timeoutInSec)
-                        break;
-                    await Task.Delay(frequencyInFrame);
-                }
+                await WaitUntil(condition, () => false, frequencyInFrame, timeoutInSec);
             }
 
             public static async Task WaitUntil(Func<bool> condition, Func<bool> breaker, int frequencyInFrame = 100, int timeoutInSec = -1)

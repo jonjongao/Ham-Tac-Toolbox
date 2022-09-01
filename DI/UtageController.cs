@@ -27,7 +27,7 @@ public class UtageController : MonoBehaviour
 
     [SerializeField]
     AdvEngine m_engine;
-
+    
     public event UnityAction<Callback> OnChange;
 
     [SerializeField]
@@ -86,6 +86,13 @@ public class UtageController : MonoBehaviour
             onComplete?.Invoke();
             return;
         }
+
+        if(m_engine==null)
+        {
+            JDebug.W($"UtageEngine is not initialized yet, wait until");
+            await Extension.Async.WaitUntil(() => m_engine != null);
+        }    
+       
 
         if (isForced)
             m_engine.JumpScenario(id);
