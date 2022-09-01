@@ -98,26 +98,35 @@ namespace HamTac
             var script = obj.GetComponent<DebugGroup>();
             return script;
         }
-
+        public static DebugGroup BeginVScrollGroup(string key, params (string, UnityAction)[] buttons)
+        {
+            var group = BeginVScrollGroup(key);
+            foreach (var i in buttons)
+            {
+                group.AddButton(i.Item1, i.Item2);
+            }
+            return group;
+        }
         public static void AddButton(this DebugGroup group, string label, UnityAction callback)
         {
             var res = Resources.Load("DebugButton") as GameObject;
             var size = new Vector2((group.transform as RectTransform).sizeDelta.x, (res.transform as RectTransform).sizeDelta.y);
-            AddButton(group, res, size, label, callback);
+            CreateButton(group, res, size, label, callback);
         }
         public static void AddButton(this DebugGroup group, Vector2 size, string label, UnityAction callback)
         {
             var res = Resources.Load("DebugButton") as GameObject;
-            AddButton(group, res, size, label, callback);
+            CreateButton(group, res, size, label, callback);
         }
-        public static void AddButton(this DebugGroup group, GameObject template, Vector2 size, string label, UnityAction callback)
+        public static DebugButton CreateButton(DebugGroup parent, GameObject template, Vector2 size, string label, UnityAction callback)
         {
-            var obj = GameObject.Instantiate(template, group.container);
+            var obj = GameObject.Instantiate(template, parent.container);
             obj.gameObject.name = label;
             var script = obj.GetComponent<DebugButton>();
             script.size = size;
             script.text = label;
             script.OnClick += callback;
+            return script;
         }
 
         public static void SetResolution(Vector2Int resolution)
