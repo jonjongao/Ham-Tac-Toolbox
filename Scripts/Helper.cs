@@ -373,6 +373,40 @@ namespace HamTac
             return -1;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="path">ie: /Actor/Icon/Player.psd</param>
+        /// <returns></returns>
+        public static T FindResources<T>(string path) where T : UnityEngine.Object
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                JDebug.E($"Invalid path:{path}", "System");
+                return null;
+            }
+            if (Application.isPlaying)
+            {
+                path = System.IO.Path.ChangeExtension(path, null).Remove(0, 1);
+                var obj = Resources.Load<T>(path) as UnityEngine.Object;
+                if (obj == null)
+                    JDebug.E($"Cant find resources:{path}", "System");
+                return obj as T;
+            }
+            else
+            {
+#if UNITY_EDITOR
+                path = $"Assets/Resources{path}";
+                var obj = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(path);
+                if (obj == null)
+                    JDebug.E($"Cant find asset:{path}", "System");
+                return obj;
+#endif
+            }
+            return null;
+        }
+
 #if UNITY_EDITOR
         [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
         static void GetSpriteRendererSizeAsColliderSize(MenuCommand menuCommand)
@@ -415,7 +449,7 @@ namespace HamTac
         {
             RemoveDefineSymbols(new string[] { "UTAGE_INSTALLED" });
         }
-        
+
         [MenuItem("Tools/HacTac/Add DoTween define symbol")]
         public static void AddDoTweenDefineSymbol()
         {
@@ -438,6 +472,18 @@ namespace HamTac
         public static void RemoveTMPDefineSymbol()
         {
             RemoveDefineSymbols(new string[] { "TextMeshPro" });
+        }
+
+        [MenuItem("Tools/HacTac/Add ConsolePro define symbol")]
+        public static void AddConsoleProDefineSymbol()
+        {
+            AddDefineSymbols(new string[] { "CONSOLEPRO_INSTALLED" });
+        }
+
+        [MenuItem("Tools/HacTac/Remove ConsolePro define symbol")]
+        public static void RemoveConsoleProDefineSymbol()
+        {
+            RemoveDefineSymbols(new string[] { "CONSOLEPRO_INSTALLED" });
         }
 
         static void AddDefineSymbols(string[] symbols)
@@ -761,23 +807,24 @@ namespace HamTac
 
 public static class JDebug
 {
-    public static void Q(string context)
+    public static void Q(string context, string tag = null)
     {
-        Log(0, string.Empty, context, HamTac.Extension.Color.neutral);
+        Log(0, tag == null ? string.Empty : tag, context, HamTac.Extension.Color.neutral);
     }
-    public static void W(string context)
+    public static void W(string context, string tag = null)
     {
-        Log(1, string.Empty, context, Color.yellow);
+        Log(1, tag == null ? string.Empty : tag, context, Color.yellow);
     }
-    public static void E(string context)
+    public static void E(string context, string tag = null)
     {
-        Log(2, string.Empty, context, Color.red);
+        Log(2, tag == null ? string.Empty : tag, context, Color.red);
     }
 
     public static void Log(string context)
     {
         Log(0, string.Empty, context, Color.gray);
     }
+    public static void Log(string tag, string context) { Log(0, tag, context, HamTac.Extension.Color.neutral); }
     public static void Log(string tag, string context, Color color) { Log(0, tag, context, color); }
     public static void Log(int type, string tag, string context, Color color)
     {
@@ -792,6 +839,9 @@ public static class JDebug
             default:
                 Debug.Log(b); break;
         }
+#if CONSOLEPRO_INSTALLED
+        ConsoleProDebug.LogToFilter(context, tag);
+#endif
     }
 
 
