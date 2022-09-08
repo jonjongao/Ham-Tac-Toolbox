@@ -11,6 +11,7 @@ namespace HamTac
         static RectTransform root;
         static UnityAction updateHook;
         static Dictionary<string, DebugGroup> list = new Dictionary<string, DebugGroup>();
+        static bool toggleIsSetActive = false;
 
         public static void Init(Canvas parent)
         {
@@ -20,10 +21,21 @@ namespace HamTac
 
         public static bool Toggle(string key)
         {
+            if (toggleIsSetActive)
+            {
+                var i = !list[key].gameObject.activeSelf;
+                list[key].gameObject.SetActive(i);
+                return i;
+            }
             return list[key].group.Toggle();
         }
         public static void Toggle(string key, bool show)
         {
+            if (toggleIsSetActive)
+            {
+                list[key].gameObject.SetActive(show);
+                return;
+            }
             list[key].group.Toggle(show);
         }
 
@@ -140,6 +152,11 @@ namespace HamTac
             if (scaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize)
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = resolution;
+        }
+
+        public static void SetToggleAsSetActive(bool value)
+        {
+            toggleIsSetActive = value;
         }
     }
 }

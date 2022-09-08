@@ -13,39 +13,35 @@ public class ExtendedToggleGroup : ToggleGroup
     public UnityEvent<Toggle> OnSelected;
     int m_selectedIndex;
     public int selectedIndex => m_selectedIndex;
-
+    List<Toggle> m_childToggles;
 
     protected override void Awake()
     {
-        m_Toggles = GetComponentsInChildren<Toggle>().ToList();
+        m_childToggles = GetComponentsInChildren<Toggle>().ToList();
         base.Awake();
     }
 
     protected override void OnEnable()
     {
-        m_Toggles = GetComponentsInChildren<Toggle>().ToList();
-        Debug.Log($"toggle on enable:{m_Toggles.Count}");
-        for (int i = 0; i < m_Toggles.Count; i++)
+        m_childToggles = GetComponentsInChildren<Toggle>().ToList();
+        for (int i = 0; i < m_childToggles.Count; i++)
         {
             if (i == m_selectIndexOnEnable)
             {
-                Debug.Log($"select index:{i} name:{m_Toggles[i].name}");
-                m_Toggles[i].isOn = true;
+                m_childToggles[i].isOn = true;
             }
             else
-                m_Toggles[i].isOn = false;
-            m_Toggles[i].onValueChanged.AddListener(OnAnyToggleValueChanged);
-            m_Toggles[i].onValueChanged?.Invoke(m_Toggles[i].isOn);
-           
+                m_childToggles[i].isOn = false;
+            m_childToggles[i].onValueChanged.AddListener(OnAnyToggleValueChanged);
+            m_childToggles[i].onValueChanged?.Invoke(m_childToggles[i].isOn);
         }
         base.OnEnable();
     }
 
     protected override void OnDisable()
     {
-        m_Toggles = GetComponentsInChildren<Toggle>().ToList();
-        Debug.Log($"toggle on disable:{m_Toggles.Count}");
-        foreach (var i in m_Toggles)
+        m_childToggles = GetComponentsInChildren<Toggle>().ToList();
+        foreach (var i in m_childToggles)
         {
             i.onValueChanged.RemoveListener(OnAnyToggleValueChanged);
             i.isOn = false;
@@ -55,16 +51,14 @@ public class ExtendedToggleGroup : ToggleGroup
 
     void OnAnyToggleValueChanged(bool value)
     {
-
         var obj = GetFirstActiveToggle();
-        var index = m_Toggles.IndexOf(obj);
+        var index = m_childToggles.IndexOf(obj);
         m_selectedIndex = index;
-        Debug.Log($"any value change:{index}");
         OnSelected?.Invoke(obj);
     }
 
     public int IndexOfToggle(Toggle value)
     {
-        return m_Toggles.IndexOf(value);
+        return m_childToggles.IndexOf(value);
     }
 }

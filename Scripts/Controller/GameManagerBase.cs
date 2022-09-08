@@ -62,7 +62,7 @@ namespace HamTac
         }
 
         [SerializeField]
-        bool m_isPause;
+        protected bool m_isPause;
         public static bool IS_PAUSE => current.m_isPause;
 
         [SerializeField]

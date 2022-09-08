@@ -407,6 +407,8 @@ namespace HamTac
             return null;
         }
 
+     
+
 #if UNITY_EDITOR
         [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
         static void GetSpriteRendererSizeAsColliderSize(MenuCommand menuCommand)
@@ -607,7 +609,27 @@ namespace HamTac
             }
         }
 
+        public static class Asset
+        {
+            public static async void WebRequret(string url)
+            {
+                var w = new WWW(url);
+                while(w.isDone==false)
+                {
+                    JDebug.Q($"Web request progress:{w.progress}");
+                    await Task.Yield();
+                }
+                AssetBundle bundle = w.assetBundle;
+                if(w.error==null)
+                {
 
+                }
+                else
+                {
+                    JDebug.E($"Web request error:{w.error}");
+                }
+            }
+        }
     }
 
 
