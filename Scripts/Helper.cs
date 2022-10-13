@@ -15,6 +15,11 @@ namespace HamTac
 {
     static class Extension
     {
+        public static string GenerateSimpleGUID()
+        {
+            return System.Guid.NewGuid().ToString("N");
+        }
+
         private static System.Random rng = new System.Random();
 
         public static int IndexOf<T>(this T[] array, T value)
@@ -328,6 +333,18 @@ namespace HamTac
             RenderTexture.ReleaseTemporary(rt);
         }
 
+        public static float GetMaxDuration(this ParticleSystem value)
+        {
+            var d = value.main.duration;
+            for (int i = 0; i < value.subEmitters.subEmittersCount; i++)
+            {
+                var sp = value.subEmitters.GetSubEmitterSystem(i);
+                if (sp.main.duration > d)
+                    d = sp.main.duration;
+            }
+            return d;
+        }
+
         public static bool IsInLayerMask(this GameObject obj, LayerMask layerMask)
         {
             return ((layerMask.value & (1 << obj.layer)) > 0);
@@ -347,7 +364,7 @@ namespace HamTac
 
         public static int Repeat(this int value, int length)
         {
-            return value > length ? 0 : value;
+            return value >= length ? 0 : value;
         }
 
         public static int PickInRatio(float[] ratios, bool includeNoPick)
@@ -407,7 +424,52 @@ namespace HamTac
             return null;
         }
 
-     
+        public static Vector2Int ToV2I(this Vector2 value)
+        {
+            return new Vector2Int(Mathf.RoundToInt(value.x), Mathf.RoundToInt(value.y));
+        }
+
+        public static Vector2 ToV2(this Vector2Int value)
+        {
+            return new Vector2(value.x, value.y);
+        }
+
+        public static int ToI(this float value)
+        {
+            return Mathf.FloorToInt(value);
+        }
+
+        public static float PerformCalculation(string calc, string arg1, string arg2)
+        {
+            var number1 = 0f;
+            float.TryParse(arg1, out number1);
+            var number2 = 0f;
+            float.TryParse(arg2, out number2);
+
+            if (calc == "+")
+            {
+                return number1 + number2;
+            }
+            else if (calc == "-")
+            {
+                return number1 - number2;
+            }
+            else if (calc == "*")
+            {
+                return number1 * number2;
+            }
+            else if (calc == "/")
+            {
+                // Warning: Integer division probably won't produce the result you're looking for.
+                // Try using `double` instead of `int` for your numbers.
+                return number1 / number2;
+            }
+            else
+            {
+                throw new ArgumentException("Unexpected operator string: " + calc);
+            }
+        }
+
 
 #if UNITY_EDITOR
         [MenuItem("CONTEXT/BoxCollider2D/Use SpriteRenderer size", false, 3)]
@@ -614,13 +676,13 @@ namespace HamTac
             public static async void WebRequret(string url)
             {
                 var w = new WWW(url);
-                while(w.isDone==false)
+                while (w.isDone == false)
                 {
                     JDebug.Q($"Web request progress:{w.progress}");
                     await Task.Yield();
                 }
                 AssetBundle bundle = w.assetBundle;
-                if(w.error==null)
+                if (w.error == null)
                 {
 
                 }
@@ -671,6 +733,7 @@ namespace HamTac
 
     /// <summary>
     /// Inherit from dictionary, cannot have duplicate key
+    /// 注意不能用在Editor中, 會因為不正常初始化導致找不到新加入的key, value
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [System.Serializable]

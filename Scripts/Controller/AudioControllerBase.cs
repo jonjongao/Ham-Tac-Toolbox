@@ -143,8 +143,7 @@ namespace HamTac
                 JDebug.Log($"AudioController Stop Try play BGM:{clipID}");
                 if (string.IsNullOrEmpty(clipID) == false)
                 {
-                    //var clip = AudioModel.FindAudioByKey(clipID);
-                    var clip = m_current.m_table.FindByKey(clipID).clip ?? null;
+                    var clip = current.m_table.FindByKey(clipID).clip ?? null;
                     if (clip != null)
                     {
                         AudioControllerBase.PlayClip(AudioChannel.BGM, clip, true);
@@ -247,7 +246,6 @@ namespace HamTac
                 s.AppendCallback(() =>
                 {
                     t.isBusy = false;
-                    //Debug.LogWarningFormat("<color=red>2:Channel [{0}] is busy:{1}</color>", t.type, t.isBusy);
                 });
 #endif
                 //t.clip = clip;

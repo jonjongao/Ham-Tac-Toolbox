@@ -52,6 +52,9 @@ namespace HamTac
 
         [SerializeField]
         protected bool m_isFreeze;
+        /// <summary>
+        /// 單純只有isFreeze
+        /// </summary>
         public static bool IS_FREEZE => current.m_isFreeze;
         public static bool IS_LOCKED
         {
