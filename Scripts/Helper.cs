@@ -345,6 +345,14 @@ namespace HamTac
             return d;
         }
 
+        public static float EstimateMaxParticleDuration(GameObject target)
+        {
+            var p = target.GetComponent<ParticleSystem>();
+            if (p)
+                return p.GetMaxDuration();
+            return 0f;
+        }
+
         public static bool IsInLayerMask(this GameObject obj, LayerMask layerMask)
         {
             return ((layerMask.value & (1 << obj.layer)) > 0);
