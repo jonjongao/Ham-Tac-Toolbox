@@ -141,7 +141,7 @@ namespace HamTac
             float beginTime = Time.time;
             float minDuration = 1f;
 #if UNITY_EDITOR
-            minDuration = 0.25f;
+            minDuration = 0.5f;
             while (true)
             {
                 var n = (Time.time - beginTime) / minDuration;

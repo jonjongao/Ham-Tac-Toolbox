@@ -8,6 +8,7 @@ using DG.Tweening;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System;
 
 namespace HamTac
 {
@@ -29,15 +30,15 @@ namespace HamTac
         }
 
         [SerializeField]
-        AudioSource m_bgmChannel;
+        AudioSource[] m_bgmChannel;
         [SerializeField]
         AudioSource m_sfxChannel;
 
         [SerializeField]
         protected AudioMixer m_masterMixer;
 
-        protected Source m_bgm;
-        public Source bgm => m_bgm;
+        protected Source[] m_bgm;
+        public Source[] bgm => m_bgm;
 
         protected Source m_sfx;
         public Source sfx => m_sfx;
@@ -49,12 +50,18 @@ namespace HamTac
         {
             current = this;
 
-            current.m_bgm = new Source()
+            current.m_bgm = new Source[m_bgmChannel.Length];
+
+            for (int i = 0; i < current.m_bgm.Length; i++)
             {
-                type = AudioChannel.BGM,
-                source = m_bgmChannel,
-                isBusy = false
-            };
+                current.m_bgm[i] = new Source()
+                {
+                    type = AudioChannel.BGM,
+                    source = m_bgmChannel[i],
+                    isBusy = false
+                };
+            }
+
 
             current.m_sfx = new Source()
             {
@@ -65,7 +72,8 @@ namespace HamTac
 
             if (m_masterMixer == null)
             {
-                current.m_masterMixer = m_bgm.source.outputAudioMixerGroup.audioMixer;
+                var source = m_bgmChannel.Append(m_sfxChannel);
+                current.m_masterMixer = source.Where(x => x.outputAudioMixerGroup.audioMixer != null).FirstOrDefault()?.outputAudioMixerGroup.audioMixer;
             }
         }
 
@@ -95,18 +103,18 @@ namespace HamTac
 
         public static void SetBGM(string clipID)
         {
-            SetBGM(true, clipID);
+            SetBGM(true, 0, 1f, 0, clipID);
         }
 
         public static void SetBGM(string isOn, string clipID)
         {
             var a = isOn.ToBool();
-            SetBGM(a, clipID);
+            SetBGM(a, 0, 1f, 0, clipID);
         }
 
         public static bool CanPlayBGM(string clipID = null)
         {
-            var channel = AudioControllerBase.GetChannel(AudioChannel.BGM);
+            var channel = current.bgm[0];
             //Debug.LogWarningFormat("Chk channel:{0} isbusy:{1} exist:{2}",
             //	"BGM", channel.isBusy,channel.isExist);
             if (channel.isExist == false)
@@ -136,29 +144,81 @@ namespace HamTac
             return false;
         }
 
-        public static void SetBGM(bool isOn, string clipID = null)
+        public static void SetBGMSourceVolume(int index, float endValue, float duration)
+        {
+            if (Mathf.Abs(endValue - current.m_bgmChannel[index].volume) < 0.01f) return;
+            var seq = DOTween.Sequence();
+            seq.Append(current.m_bgmChannel[index].DOFade(endValue, duration));
+        }
+
+        public static void SetBGM(bool isOn)
         {
             if (isOn)
             {
-                JDebug.Log($"AudioController Stop Try play BGM:{clipID}");
-                if (string.IsNullOrEmpty(clipID) == false)
-                {
-                    var clip = current.m_table.FindByKey(clipID).clip ?? null;
-                    if (clip != null)
-                    {
-                        AudioControllerBase.PlayClip(AudioChannel.BGM, clip, true);
-                        current.m_playingBGM = clipID;
-                    }
-                }
+                SetBGM(isOn, 0, 0, 0, null);
             }
             else
             {
-                AudioControllerBase.Stop(AudioChannel.BGM);
+                SetBGM(false, 0, 0, 0, null);
+                SetBGM(false, 1, 0, 0, null);
+            }
+        }
+
+        public static void SetBGM(bool isOn, int index, float startVolume, float duration, string clipID)
+        {
+            JDebug.W($"SetBGM on:{isOn} index:{index} startVol:{startVolume} duration:{duration} clipID:{clipID}");
+            AudioSource channel = null;
+            try
+            {
+                channel = current.m_bgmChannel[index];
+            }
+            catch (System.IndexOutOfRangeException)
+            {
+                JDebug.E($"BGM dont have index:{index}"); return;
+            }
+            catch (System.NullReferenceException)
+            {
+                JDebug.E($"BGM index:{index} is null"); return;
+            }
+            if (channel == null)
+            {
+                JDebug.E($"BGM index:{index} is null"); return;
+            }
+            if (isOn)
+            {
+                JDebug.Log($"AudioController Stop Try play BGM:{clipID}");
+                AudioClip clip = null;
+                if (!string.IsNullOrEmpty(clipID)) clip = current.m_table.FindByKey(clipID).clip;
+                if (clip == channel.clip) return;
+                var seq = DOTween.Sequence();
+                if (channel.isPlaying)
+                {
+                    JDebug.W($"BGM is playing, try fade between clips from:{channel.clip.name} to:{clip.name}");
+                    seq.Append(channel.DOFade(0f, duration));
+                }
+                seq.AppendCallback(() =>
+                {
+                    AudioControllerBase.PlayClip(current.bgm[index], clip, true);
+                    channel.volume = 0f;
+                    current.m_playingBGM = clipID;
+                });
+                seq.Append(channel.DOFade(startVolume, duration));
+                seq.SetId(current);
+            }
+            else
+            {
+                var seq = DOTween.Sequence();
+                seq.Append(channel.DOFade(0f, duration));
+                seq.AppendCallback(() =>
+                {
+                    AudioControllerBase.Stop(current.bgm[index]);
+                });
+                seq.SetId(current);
             }
         }
 
 
-        public static void PlaySFX(string clipID)
+        public static async void PlaySFX(string clipID, float delay = 0f)
         {
             Debug.LogWarningFormat("<color=cyan>Try play SFX:{0}</color>", clipID);
             //var clip = AudioModel.FindClipByKey(clipID);
@@ -166,7 +226,9 @@ namespace HamTac
             Debug.LogWarningFormat("find result:{0}", clip);
             if (clip != null)
             {
-                AudioControllerBase.PlayClip(AudioChannel.SFX, clip);
+                if (delay > 0f)
+                    await Extension.Async.Delay(delay);
+                AudioControllerBase.PlayClip(current.sfx, clip);
             }
         }
 
@@ -191,17 +253,17 @@ namespace HamTac
             }
         }
 
-        public static void PlayClip(AudioChannel target, AudioClip clip) { PlayClip(target, clip, false); }
-        public static void PlayClip(AudioChannel target, AudioClip clip, bool isLoop)
+        public static void PlayClip(Source source, AudioClip clip) { PlayClip(source, clip, false); }
+        public static void PlayClip(Source source, AudioClip clip, bool isLoop)
         {
             if (clip == null)
             {
                 Debug.LogError($"Try PlayClip but clip is null");
                 return;
             }
-            var t = GetChannel(target);
+            var t = source;
             t.source.loop = isLoop;
-            if (target == AudioChannel.SFX && isLoop == false)
+            if (t.type == AudioChannel.SFX && isLoop == false)
             {
                 //Debug.LogWarningFormat("play clip:{0}", clip.name);
                 if (current.m_oneShotHistory.ContainsKey(clip.name))
@@ -235,33 +297,37 @@ namespace HamTac
                 t.isBusy = true;
                 //Debug.LogWarningFormat("<color=red>Channel [{0}] is busy:{1}</color>", t.type, t.isBusy);
 #if DOTWEEN_INSTALLED
-                var s = DOTween.Sequence();
-                s.Append(t.source.DOFade(0f, 0.5f).SetSpeedBased(true));
-                s.AppendCallback(() =>
-                {
-                    t.source.clip = clip;
-                    t.source.Play();
-                });
-                s.Append(t.source.DOFade(1f, 0.5f).SetSpeedBased(true));
-                s.AppendCallback(() =>
-                {
-                    t.isBusy = false;
-                });
+                t.source.clip = clip;
+                t.source.Play();
+                //var s = DOTween.Sequence();
+                //s.Append(t.source.DOFade(0f, 0.5f).SetSpeedBased(true));
+                //s.AppendCallback(() =>
+                //{
+                //    t.source.clip = clip;
+                //    t.source.Play();
+                //});
+                //s.Append(t.source.DOFade(1f, 0.5f).SetSpeedBased(true));
+                //s.AppendCallback(() =>
+                //{
+                //    t.isBusy = false;
+                //});
 #endif
-                //t.clip = clip;
-                //t.Play();
+                //t.source.clip = clip;
+                //t.source.Play();
             }
         }
 
-        public static async void Stop(AudioChannel target)
+
+
+        public static async void Stop(Source source)
         {
-            await StopAsync(target);
+            await StopAsync(source);
         }
 
-        public static async Task StopAsync(AudioChannel target)
+        public static async Task StopAsync(Source source)
         {
-            JDebug.Log($"AudioController Stop Audio stop, channel:{target.ToString()}");
-            var t = GetChannel(target);
+            JDebug.Log($"AudioController Stop Audio stop, channel:{source.ToString()}");
+            var t = source;
             if (t.isExist)
             {
                 t.source.Stop();
@@ -270,12 +336,5 @@ namespace HamTac
             await Task.Yield();
         }
 
-        public static Source GetChannel(AudioChannel channel)
-        {
-            if (current == null) return null;
-            if (channel == AudioChannel.BGM) return current.bgm;
-            else if (channel == AudioChannel.SFX) return current.sfx;
-            return null;
-        }
     }
 }

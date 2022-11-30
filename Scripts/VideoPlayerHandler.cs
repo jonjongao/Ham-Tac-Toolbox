@@ -17,6 +17,15 @@ namespace HamTac
         string m_key;
         public string key => m_key;
         VideoPlayer m_player;
+        public VideoPlayer player
+        {
+            get
+            {
+                if (m_player)
+                    m_player = GetComponent<VideoPlayer>();
+                return m_player;
+            }
+        }
         RawImage m_rawImage;
         CanvasGroup m_canvasGroup;
         AudioSource m_audio;
@@ -42,6 +51,15 @@ namespace HamTac
             m_canvasGroup.Toggle(false);
         }
 
+        private void OnDestroy()
+        {
+            m_player.loopPointReached -= M_player_loopPointReached;
+            m_player.prepareCompleted -= M_player_prepareCompleted;
+            m_player.started -= M_player_started;
+            if (all.ContainsKey(m_key))
+                all.Remove(m_key);
+        }
+
 #if DOTWEEN_INSTALLED
         Tweener m_audioFade;
 #endif
@@ -61,8 +79,8 @@ namespace HamTac
 
         public void PlayClip(VideoClip clip, UnityAction onComplete = null)
         {
-            m_player.clip = clip;
-            m_player.Play();
+            player.clip = clip;
+            player.Play();
             OnComplete = onComplete;
         }
 

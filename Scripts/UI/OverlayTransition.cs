@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using HamTac;
+using System.Threading.Tasks;
 #if DOTWEEN_INSTALLED
 using DG.Tweening;
 #endif
@@ -74,36 +75,43 @@ public class OverlayTransition : MonoBehaviour
         m_isPlaying = false;
     }
 
-    public virtual void PlayIn()
+    public virtual async Task PlayInAsync()
     {
         m_canvasGroup.Toggle(true);
         m_isPlaying = true;
+        var tcs = new TaskCompletionSource<bool>();
         if (m_graphic is RawImage)
         {
             if ((m_graphic as RawImage).material.HasFloat("_Amount"))
             {
 #if DOTWEEN_INSTALLED
                 (m_graphic as RawImage).material.SetFloat("_Amount", 0f);
-                (m_graphic as RawImage).material.DOFloat(1f, "_Amount", 1f);
+                (m_graphic as RawImage).material.DOFloat(1f, "_Amount", 1f).OnComplete(()=>tcs.SetResult(true));
+                OnClipBegin();
+                await tcs.Task;
 #else
                 (m_graphic as RawImage).material.SetFloat("_Amount", 1f);
+                 OnClipBegin();
 #endif
             }
-            OnClipBegin();
         }
     }
 
-    public virtual void PlayOut()
+    public virtual async Task PlayOutAsync()
     {
         m_canvasGroup.Toggle(true);
         m_isPlaying = true;
+        var tcs = new TaskCompletionSource<bool>();
         if (m_graphic is RawImage)
         {
             if ((m_graphic as RawImage).material.HasFloat("_Amount"))
             {
 #if DOTWEEN_INSTALLED
                 (m_graphic as RawImage).material.SetFloat("_Amount", 1f);
-                (m_graphic as RawImage).material.DOFloat(0f, "_Amount", 1f).OnComplete(OnClipEnd);
+                (m_graphic as RawImage).material.DOFloat(0f, "_Amount", 1f).OnComplete(()=>tcs.SetResult(true));
+
+                await tcs.Task;
+                OnClipEnd();
 #else
                 (m_graphic as RawImage).material.SetFloat("_Amount", 0f);
                 OnClipEnd();
@@ -114,11 +122,13 @@ public class OverlayTransition : MonoBehaviour
 
     public virtual void OnClipBegin()
     {
+        JDebug.W($"OverlayTransition OnClipBegin");
         m_isPlaying = true;
     }
 
     public virtual void OnClipEnd()
     {
+        JDebug.W($"OverlayTransition OnClipEnd");
         m_canvasGroup.Toggle(false);
         m_isPlaying = false;
     }

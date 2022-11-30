@@ -144,6 +144,53 @@ namespace HamTac
             return canvasGroup.interactable;
         }
 
+        public static void SwitchToIndex(this IEnumerable<GameObject> targets, int index)
+        {
+            try
+            {
+                var arr = targets.ToArray();
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    if (arr[i] == null) continue;
+                    if (i == index)
+                        arr[i].SetActive(true);
+                    else
+                        arr[i].SetActive(false);
+                }
+            }
+            catch (System.ArgumentOutOfRangeException)
+            {
+                JDebug.E($"Index:{index} is out of range");
+            }
+        }
+
+        public static void SwitchToIndex(this List<CanvasGroup> canvasGroupArray, int index)
+        {
+            try
+            {
+                for (int i = 0; i < canvasGroupArray.Count; i++)
+                {
+                    if (canvasGroupArray[i] == null) continue;
+                    if (i == index)
+                        canvasGroupArray[i].Toggle(true);
+                    else
+                        canvasGroupArray[i].Toggle(false);
+                }
+            }
+            catch (System.ArgumentOutOfRangeException)
+            {
+                JDebug.E($"Index:{index} is out of range");
+            }
+        }
+
+        public static void SwitchToNext(this List<CanvasGroup> canvasGroupArray)
+        {
+            var index = canvasGroupArray.IndexOf(canvasGroupArray.First(x => x.alpha >= 0.9f));
+            var next = Repeat(index + 1, canvasGroupArray.Count());
+            canvasGroupArray.SwitchToIndex(next);
+        }
+
+
         public static bool IsOn(this CanvasGroup canvasGroup)
         {
             return canvasGroup.alpha > 0.5f;
@@ -454,19 +501,19 @@ namespace HamTac
             var number2 = 0f;
             float.TryParse(arg2, out number2);
 
-            if (calc == "+")
+            if (calc.Equals("+"))
             {
                 return number1 + number2;
             }
-            else if (calc == "-")
+            else if (calc.Equals("-"))
             {
                 return number1 - number2;
             }
-            else if (calc == "*")
+            else if (calc.Equals("*"))
             {
                 return number1 * number2;
             }
-            else if (calc == "/")
+            else if (calc.Equals("/"))
             {
                 // Warning: Integer division probably won't produce the result you're looking for.
                 // Try using `double` instead of `int` for your numbers.
@@ -476,6 +523,38 @@ namespace HamTac
             {
                 throw new ArgumentException("Unexpected operator string: " + calc);
             }
+        }
+        public static bool PerformCondition(string calc, string arg1, string arg2)
+        {
+            var number1 = 0f;
+            float.TryParse(arg1, out number1);
+            return PerformCondition(calc, number1, arg2);
+        }
+        public static bool PerformCondition(string calc, float arg1, string arg2)
+        {
+            var number2 = 0f;
+            float.TryParse(arg2, out number2);
+            if (calc.Equals("<"))
+            {
+                return arg1 < number2;
+            }
+            else if (calc.Equals("<="))
+            {
+                return (arg1 <= number2);
+            }
+            else if (calc.Equals(">"))
+            {
+                return arg1 > number2;
+            }
+            else if (calc.Equals(">="))
+            {
+                return (arg1 >= number2);
+            }
+            else if (calc.Equals("=="))
+            {
+                return arg1 == number2;
+            }
+            throw new ArgumentException("Unexpected operator string: " + calc);
         }
 
 
@@ -600,7 +679,7 @@ namespace HamTac
 
         public static class Async
         {
-            public static async Task Yield(int num)
+            public static async Task Yield(int num = 1)
             {
                 for (int i = 0; i < num; i++)
                 {
@@ -615,17 +694,20 @@ namespace HamTac
                 {
                     if (timeoutInSec > 0f && Time.time - begin > timeoutInSec)
                         break;
-                    await Task.Delay(frequencyInFrame);
+                    await Yield(frequencyInFrame);
                 }
             }
 
-            public static async Task WaitUntil(Func<bool> condition, int frequencyInFrame = 100, int timeoutInSec = -1)
+            public static async Task WaitUntil(Func<bool> condition, int frequencyInFrame = 1, float timeoutInSec = -1)
             {
-                await WaitUntil(condition, () => false, frequencyInFrame, timeoutInSec);
+                await WaitUntil(condition, () => false, frequencyInFrame, timeoutInSec, -1);
             }
 
-            public static async Task WaitUntil(Func<bool> condition, Func<bool> breaker, int frequencyInFrame = 100, int timeoutInSec = -1)
+
+            public static async Task WaitUntil(Func<bool> condition, Func<bool> breaker, int frequencyInFrame = 1, float timeoutInSec = -1, float minRequiredSec = -1)
             {
+                if (minRequiredSec > 0f)
+                    await Delay(minRequiredSec);
                 var begin = Time.time;
                 while (!condition())
                 {
@@ -633,7 +715,7 @@ namespace HamTac
                         break;
                     if (Application.isPlaying == false || breaker())
                         break;
-                    await Task.Delay(frequencyInFrame);
+                    await Yield(frequencyInFrame);
                 }
             }
 

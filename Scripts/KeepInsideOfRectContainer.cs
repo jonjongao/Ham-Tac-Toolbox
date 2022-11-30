@@ -14,7 +14,7 @@ public class KeepInsideOfRectContainer : MonoBehaviour
 
     private void Update()
     {
-        Vector2 pos = Input.mousePosition;
+        Vector2 pos = VirtualPointer.current.mousePosition;
         movable.anchoredPosition = pos + m_pivotOffset;
 
         // RectTransform container, movable;

@@ -14,23 +14,27 @@ namespace HamTac
         private void Awake()
         {
             m_group = GetComponent<CanvasGroup>();
+            gameObject.SetActive(false);
         }
 
         private void OnEnable()
         {
+            //JDebug.W($"Enable {gameObject.name}");
             SetProgress(0f);
             m_group.Toggle(true);
         }
 
         private void OnDisable()
         {
+            //JDebug.W($"Disable {gameObject.name}");
             m_group.Toggle(false);
         }
 
         public void SetProgress(float value)
         {
-            if (m_progressBar.gameObject.activeInHierarchy == false)
-                m_progressBar.gameObject.SetActive(true);
+            if (gameObject.activeSelf == false)
+                gameObject.SetActive(true);
+            //JDebug.W($"Set loading progress:{value}");
             m_progressBar.SetNormalize(value);
         }
     }
