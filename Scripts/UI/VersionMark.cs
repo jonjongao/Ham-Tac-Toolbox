@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-[RequireComponent(typeof(Text), typeof(TMPro.TextMeshProUGUI))]
+[RequireComponent(typeof(TMPro.TextMeshProUGUI))]
 public class VersionMark : UIBehaviour
 {
     protected override void OnEnable()
@@ -17,12 +17,17 @@ public class VersionMark : UIBehaviour
         else
         {
             if (g is Text)
-                (g as Text).text = CurrentBundleVersion.version;
+                (g as Text).text = FormVersion();
             else if (g is TMPro.TextMeshProUGUI)
-                (g as TMPro.TextMeshProUGUI).text = CurrentBundleVersion.version;
+                (g as TMPro.TextMeshProUGUI).text = FormVersion();
             else
                 gameObject.SetActive(false);
         }
         base.OnEnable();
+    }
+
+    string FormVersion()
+    {
+        return $"{Application.version}";
     }
 }

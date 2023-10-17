@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace HamTac
 {
-    [CreateAssetMenu(fileName = "AudioClipTable", menuName = "AudioClipLookupTable")]
+    [CreateAssetMenu(fileName = "AudioClipTable", menuName = "TBSF/LookupTable/AudioClipLookupTable")]
     public class AudioClipLookupTable : AssetLookupTable<HamTac.AudioPointer>
     {
         public static AudioClipLookupTable FindByName(string value)

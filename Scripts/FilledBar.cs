@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using HamTac;
+#if DOTWEEN_INSTALLED
 using DG.Tweening;
-
+#endif
 public class FilledBar : MonoBehaviour
 {
     [SerializeField]
     Image m_bgImage;
     [SerializeField]
     Image m_filledImage;
+    public Image filledImage => m_filledImage;
     Color m_defaultFilledColor;
+#if DOTWEEN_INSTALLED
     Sequence m_tween;
+#endif
     [SerializeField]
     Color m_increasePopColor = Color.green;
     [SerializeField]
@@ -21,6 +25,15 @@ public class FilledBar : MonoBehaviour
     bool m_autoHideIfZeroValue = false;
     CanvasGroup m_group;
 
+    public Color filledColor
+    {
+        get => m_filledImage.color;
+        set
+        {
+            m_filledImage.color = value;
+            m_defaultFilledColor = value;
+        }
+    }
 
     private void Awake()
     {
@@ -41,7 +54,7 @@ public class FilledBar : MonoBehaviour
             value > 0.01f &&
             m_group.alpha <= 0.01f)
             m_group.alpha = 1f;
-
+#if DOTWEEN_INSTALLED
         var t = DOTween.Sequence();
         JDebug.W($"Set fill amount from:{m_filledImage.fillAmount} to:{value}");
         t.Append(m_filledImage.DOFillAmount(value, 0.5f));
@@ -60,10 +73,13 @@ public class FilledBar : MonoBehaviour
             }
         });
         t.SetId(gameObject);
+#endif
     }
 
     private void OnDestroy()
     {
+#if DOTWEEN_INSTALLED
         DOTween.Kill(gameObject);
+#endif
     }
 }

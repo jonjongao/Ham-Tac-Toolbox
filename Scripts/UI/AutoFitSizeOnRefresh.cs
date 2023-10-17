@@ -20,7 +20,8 @@ public class AutoFitSizeOnRefresh : UIBehaviour
         m_graphic.UnregisterDirtyLayoutCallback(OnDirty);
     }
 
-    void OnDirty()
+    [ContextMenu("Refresh")]
+    public void OnDirty()
     {
         (transform as RectTransform).sizeDelta = m_graphic.rectTransform.sizeDelta;
     }

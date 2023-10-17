@@ -1,3 +1,5 @@
+using Sirenix.OdinInspector;
+using UnityEditor;
 using UnityEngine.UI;
 
 namespace UnityEngine.EventSystems
@@ -7,6 +9,21 @@ namespace UnityEngine.EventSystems
     /// </summary>
     public class CustomBaseInput : BaseInput
     {
+        [SerializeField]
+        GameObject m_currentSelected;
+
+        [Button]
+        public void PingCurrentSelected()
+        {
+#if UNITY_EDITOR
+            var obj = EventSystem.current.currentSelectedGameObject;
+            if(obj)
+            {
+                EditorGUIUtility.PingObject(obj);
+            }
+#endif
+        }
+
         /// <summary>
         /// Interface to Input.mousePosition. Can be overridden to provide custom input instead of using the Input class.
         /// </summary>

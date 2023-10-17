@@ -60,8 +60,13 @@ namespace HamTac
         {
             get
             {
-                return current.m_isFreeze;
+                return !m_current.CanInteract();
             }
+        }
+        protected virtual bool CanInteract()
+        {
+            var isBusy=current.m_isFreeze||current.m_isPause||current.m_isLoading;
+            return !isBusy;
         }
 
         [SerializeField]
@@ -71,6 +76,7 @@ namespace HamTac
         [SerializeField]
         protected bool m_isLoading;
         public static bool IS_LOADING => current.m_isLoading;
+        public static bool IS_UNLOADING => current.m_isUnloading;
 
         [SerializeField]
         protected string m_currentScene;
@@ -94,13 +100,21 @@ namespace HamTac
         protected virtual void OnDestroy() { }
 
 
-        protected virtual void Start() { }
+        protected virtual void Start()
+        {
+        }
 
         protected virtual void Update()
         {
             if (IS_FREEZE && Time.frameCount % 60 == 0)
                 JDebug.Log($"Global freeze is on");
             HAS_LMB = Input.GetButtonDown("Fire1");
+#if UNITY_EDITOR
+            //if (Input.GetKeyDown(KeyCode.Tab))
+            //{
+            //    Cursor.visible = !Cursor.visible;
+            //}
+#endif
         }
 
         public void ExitGame()
@@ -109,11 +123,12 @@ namespace HamTac
             Application.Quit();
         }
 
-        protected virtual async Task<bool> LoadSceneAsync(string id, bool showProgressBar, float min = 0f, float max = 1f)
+        protected virtual async Task<bool> LoadSceneAsync(string id, bool showProgressBar, bool disableLoadingScreenOnComplete, float min = 0f, float max = 1f)
         {
+            JDebug.W($"LoadSceneAsync id:{id}");
             var op = SceneManager.LoadSceneAsync(id, LoadSceneMode.Additive);
             op.allowSceneActivation = false;
-            await OnSceneLoading(op, showProgressBar, min, max);
+            await OnSceneLoading(op, showProgressBar, disableLoadingScreenOnComplete, min, max);
             op.allowSceneActivation = true;
             //await Task.Yield();
             //!如果等待時間不夠，會有下一個場景要求的reference發生NullException問題
@@ -123,18 +138,33 @@ namespace HamTac
             return true;
         }
 
-        protected virtual async Task<bool> UnloadSceneAsync(string id, bool showProgressBar, float min = 0f, float max = 1f)
+        protected bool m_isUnloading;
+
+        protected virtual async Task<bool> UnloadSceneAsync(string id, bool showProgressBar, bool disableLoadingScreenOnComplete, float min = 0f, float max = 1f)
         {
+            if(m_isUnloading)
+            {
+                Debug.LogError($"Another unload task is already running");
+                return false;
+            }
+            m_isUnloading = true;
+            JDebug.W($"UnloadScene.0");
+            Debug.Log($"Try unload scene:{id}");
             var op = SceneManager.UnloadSceneAsync(id);
-            op.allowSceneActivation = false;
-            await OnSceneLoading(op, showProgressBar, min, max);
-            op.allowSceneActivation = true;
+            if(op!=null)
+                op.allowSceneActivation = false;
+            JDebug.W($"UnloadScene.1");
+            await OnSceneLoading(op, showProgressBar, disableLoadingScreenOnComplete, min, max);
+            if(op!=null)
+                op.allowSceneActivation = true;
+            JDebug.W($"UnloadScene.2");
             m_currentScene = string.Empty;
             await Task.Yield();
+            m_isUnloading=false;
             return true;
         }
 
-        async Task<bool> OnSceneLoading(AsyncOperation op, bool showProgressBar, float min = 0f, float max = 1f)
+        async Task<bool> OnSceneLoading(AsyncOperation op, bool showProgressBar, bool disableLoadingScreenOnComplete, float min = 0f, float max = 1f)
         {
             if (m_loadingScreen)
                 m_loadingScreen.gameObject.SetActive(true);
@@ -147,7 +177,7 @@ namespace HamTac
                 var n = (Time.time - beginTime) / minDuration;
                 if (showProgressBar && m_loadingScreen)
                     m_loadingScreen.SetProgress(min + (n * (max - min)));
-                if (n >= 1f && op.progress >= 0.9f)
+                if (n >= 1f && (op!=null? op.progress >= 0.9f:true))
                     break;
                 await Task.Yield();
             }
@@ -164,7 +194,7 @@ namespace HamTac
         await Task.Delay(Mathf.CeilToInt(minDuration * 1000));
 #endif
             if (m_loadingScreen)
-                m_loadingScreen.gameObject.SetActive(false);
+                m_loadingScreen.gameObject.SetActive(!disableLoadingScreenOnComplete);
             return true;
         }
 

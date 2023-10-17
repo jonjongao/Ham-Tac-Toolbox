@@ -46,4 +46,18 @@ public class AnimationEventProxy : MonoBehaviour
             eventList.Add(key, null);
         }
     }
+
+    public virtual void Disable()
+    {
+        if (HasEvent("Disable"))
+            ExecuteEvent("Disable");
+        gameObject.SetActive(false);
+    }
+
+    public virtual void Enable()
+    {
+        if (HasEvent("Enable"))
+            ExecuteEvent("Enable");
+        gameObject.SetActive(true);
+    }
 }

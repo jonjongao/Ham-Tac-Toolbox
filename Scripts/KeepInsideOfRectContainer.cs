@@ -8,13 +8,33 @@ public class KeepInsideOfRectContainer : MonoBehaviour
     RectTransform container;
     [SerializeField]
     Vector2 m_pivotOffset;
-    
+
     Vector3[] cornersCache = new Vector3[4];
     RectTransform movable => transform as RectTransform;
 
+    private void Awake()
+    {
+        if (container == null)
+        {
+            try
+            {
+                container = GameObject.FindWithTag("MainCanvas")?.transform as RectTransform;
+            }
+            catch (System.Exception err)
+            {
+                Debug.LogError(err);
+            }
+        }
+    }
+
     private void Update()
     {
-        Vector2 pos = VirtualPointer.current.mousePosition;
+        if (container == null) return;
+        Vector2 pos = Vector2.zero;
+        if (VirtualPointer.current)
+            pos = VirtualPointer.current.mousePosition;
+        else
+            pos = Input.mousePosition;
         movable.anchoredPosition = pos + m_pivotOffset;
 
         // RectTransform container, movable;

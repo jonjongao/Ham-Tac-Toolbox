@@ -14,7 +14,7 @@ namespace HamTac
     }
 
     [System.Serializable]
-    public struct AudioPointer
+    public class AudioPointer
     {
         //public EventDispatcher.Type listenEvent;
         public bool useEnum;

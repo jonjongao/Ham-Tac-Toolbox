@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -78,5 +81,35 @@ public class LegacyTextScaler : UIBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorUtility.SetDirty(this);
 #endif
+    }
+
+    [ContextMenu("Initialize")]
+    public void Initialize()
+    {
+        if (m_sampleText == null)
+        {
+            var obj = new GameObject("Sample", typeof(Text), typeof(ContentSizeFitter));
+            obj.transform.SetParent(transform, false);
+            m_sampleText = obj.GetComponent<Text>();
+            text = "NewText";
+            var fitter = obj.GetComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(this);
+            EditorUtility.SetDirty(obj);
+#endif
+        }
+        if (m_displayText == null)
+        {
+            var obj = new GameObject("Display", typeof(Text));
+            obj.transform.SetParent(transform, false);
+            m_displayText = obj.GetComponent<Text>();
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(this);
+            EditorUtility.SetDirty(obj);
+#endif
+        }
+        RefreshText();
     }
 }

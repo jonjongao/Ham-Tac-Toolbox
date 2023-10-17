@@ -4,17 +4,12 @@ using UnityEngine;
 
 namespace HamTac
 {
-    [CreateAssetMenu(fileName = "ResourceTable", menuName = "ResourceLookupTable")]
+    [CreateAssetMenu(fileName = "ResourceTable", menuName = "TBSF/LookupTable/ResourceLookupTable")]
     public class ResourceLookupTable : AssetLookupTable<Object>
     {
-        public static ResourceLookupTable FindByName(string value)
-        {
-            var path = $"Asset/{value}";
-            var obj = Resources.Load<ResourceLookupTable>(path);
-            if (obj == null)
-                JDebug.Log($"Cant find AssetTable:{path}");
-            return obj;
-        }
+        static Dictionary<string, ResourceLookupTable> cache = new Dictionary<string, ResourceLookupTable>();
+
+       
     }
 
 }

@@ -66,6 +66,8 @@ namespace HamTac
 
         private void Update()
         {
+            if (!m_hasStart && m_player.clip == null)
+                return;
             var near = m_startTimestamp + m_player.clip.length - 0.5f;
 #if DOTWEEN_INSTALLED
             if (m_hasStart && Time.time > near && m_audioFade == null)
@@ -79,7 +81,12 @@ namespace HamTac
 
         public void PlayClip(VideoClip clip, UnityAction onComplete = null)
         {
+            PlayClip(clip, 1f, onComplete);
+        }
+        public void PlayClip(VideoClip clip, float playbackSpeed, UnityAction onComplete = null)
+        {
             player.clip = clip;
+            player.playbackSpeed = playbackSpeed;
             player.Play();
             OnComplete = onComplete;
         }

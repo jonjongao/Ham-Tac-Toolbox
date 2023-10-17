@@ -36,5 +36,21 @@ namespace HamTac
         {
             DebugMenu.Destroy();
         }
+
+        protected static (System.Type type, System.Action<object> callback) m_waitMouseDownCallback;
+
+        public static void WAIT_MOUSE_DOWN<T>(System.Action<object> callback)
+        {
+            m_waitMouseDownCallback = (typeof(T), callback);
+        }
+
+        public static void DISPATCH_MOUSE_DOWN<T>(object content)
+        {
+            if (m_waitMouseDownCallback.type == null || m_waitMouseDownCallback.type != typeof(T))
+                return;
+            m_waitMouseDownCallback.callback?.Invoke(content);
+
+            m_waitMouseDownCallback = (null, null);
+        }
     }
 }

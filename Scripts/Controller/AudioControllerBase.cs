@@ -36,6 +36,29 @@ namespace HamTac
 
         [SerializeField]
         protected AudioMixer m_masterMixer;
+        public AudioMixer masterMixer
+        {
+            get
+            {
+                if (m_bgmChannel.Length == 0 || m_sfxChannel == null)
+                {
+                    Debug.LogError("No valid audio source assigned");
+                    return null;
+                }
+                if (m_masterMixer == null)
+                {
+                    var source = m_bgmChannel.Append(m_sfxChannel);
+                    current.m_masterMixer = source.Where(x => x.outputAudioMixerGroup.audioMixer != null).FirstOrDefault()?.outputAudioMixerGroup.audioMixer;
+                }
+                return m_masterMixer;
+            }
+        }
+        [SerializeField]
+        AudioMixerGroup m_soundGroup;
+        public AudioMixerGroup soundGroup => m_soundGroup;
+        [SerializeField]
+        AudioMixerGroup m_musicGroup;
+        public AudioMixerGroup musicGroup => m_musicGroup;
 
         protected Source[] m_bgm;
         public Source[] bgm => m_bgm;
@@ -70,11 +93,7 @@ namespace HamTac
                 isBusy = false
             };
 
-            if (m_masterMixer == null)
-            {
-                var source = m_bgmChannel.Append(m_sfxChannel);
-                current.m_masterMixer = source.Where(x => x.outputAudioMixerGroup.audioMixer != null).FirstOrDefault()?.outputAudioMixerGroup.audioMixer;
-            }
+            
         }
 
         protected Dictionary<string, float> m_oneShotHistory = new Dictionary<string, float>();
@@ -144,6 +163,18 @@ namespace HamTac
             return false;
         }
 
+        public static bool GetBGMSourceVolume(int index,out float value)
+        {
+            try
+            {
+                value = current.m_bgmChannel[index].volume;
+                return true;
+            }catch(System.Exception err)
+            {
+                value = 0f;
+            }
+            return false;
+        }
         public static void SetBGMSourceVolume(int index, float endValue, float duration)
         {
             if (Mathf.Abs(endValue - current.m_bgmChannel[index].volume) < 0.01f) return;
@@ -164,9 +195,31 @@ namespace HamTac
             }
         }
 
+        public static bool HasExistBGM(int index)
+        {
+            if (current == null) return false;
+            try
+            {
+                return current.m_bgmChannel[index].clip != null;
+            }catch(System.Exception e)
+            {
+                Debug.LogError(e);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isOn"></param>
+        /// <param name="index"></param>
+        /// <param name="startVolume"></param>
+        /// <param name="duration"></param>
+        /// <param name="clipID">Can be null</param>
         public static void SetBGM(bool isOn, int index, float startVolume, float duration, string clipID)
         {
             JDebug.W($"SetBGM on:{isOn} index:{index} startVol:{startVolume} duration:{duration} clipID:{clipID}");
+           
             AudioSource channel = null;
             try
             {
@@ -194,6 +247,10 @@ namespace HamTac
                 if (channel.isPlaying)
                 {
                     JDebug.W($"BGM is playing, try fade between clips from:{channel.clip.name} to:{clip.name}");
+                    seq.AppendCallback(() =>
+                    {
+                        JDebug.W($"Set volume of channel:{index} to:{0}");
+                    });
                     seq.Append(channel.DOFade(0f, duration));
                 }
                 seq.AppendCallback(() =>
@@ -202,12 +259,20 @@ namespace HamTac
                     channel.volume = 0f;
                     current.m_playingBGM = clipID;
                 });
+                seq.AppendCallback(() =>
+                {
+                    JDebug.W($"Set volume of channel:{index} to:{startVolume}");
+                });
                 seq.Append(channel.DOFade(startVolume, duration));
                 seq.SetId(current);
             }
             else
             {
                 var seq = DOTween.Sequence();
+                seq.AppendCallback(() =>
+                {
+                    JDebug.W($"Set volume of channel:{index} to:{0}");
+                });
                 seq.Append(channel.DOFade(0f, duration));
                 seq.AppendCallback(() =>
                 {
@@ -220,47 +285,55 @@ namespace HamTac
 
         public static async void PlaySFX(string clipID, float delay = 0f)
         {
-            Debug.LogWarningFormat("<color=cyan>Try play SFX:{0}</color>", clipID);
+            //Debug.Log($"Try play SFX:{clipID}");
             //var clip = AudioModel.FindClipByKey(clipID);
-            var clip = m_current.m_table.FindByKey(clipID).clip;
-            Debug.LogWarningFormat("find result:{0}", clip);
+            var clip = m_current.m_table.FindByKey(clipID)?.clip;
+            //Debug.LogError($"find result:{clip}");
             if (clip != null)
             {
-                if (delay > 0f)
-                    await Extension.Async.Delay(delay);
-                AudioControllerBase.PlayClip(current.sfx, clip);
+                await AudioControllerBase.PlayClip(current.sfx, clip, false, delay);
             }
         }
 
         public static void SetVolume(AudioChannel target, float value)
         {
-            value = Mathf.Clamp(value, 0.01f, 0.99f);
-            var vol = Mathf.Log10(value) * 20;
-            Debug.LogWarningFormat("Set Vol:{0} to:{1} as {2}", target, value, vol);
-            //GetChannel(target).volume = value;
-            Debug.Log($"instance:{current} mixer:{current?.m_masterMixer}");
-            switch (target)
+            try
             {
-                case AudioChannel.BGM:
-                    current.m_masterMixer.SetFloat("BGMVol", vol);
-                    break;
-                case AudioChannel.SFX:
-                    current.m_masterMixer.SetFloat("SFXVol", vol);
-                    break;
-                default:
-                    current.m_masterMixer.SetFloat("MasterVol", value <= 0.01f ? -80f : vol);
-                    break;
+                if(current.masterMixer==null)
+                JDebug.W($"Set volume of channel:{target.GetType().Name} to:{value}");
+                value = Mathf.Clamp(value, 0.01f, 0.99f);
+                var vol = Mathf.Log10(value) * 20;
+                //GetChannel(target).volume = value;
+                switch (target)
+                {
+                    case AudioChannel.BGM:
+                        current.masterMixer.SetFloat("BGMVol", vol);
+                        break;
+                    case AudioChannel.SFX:
+                        current.masterMixer.SetFloat("SFXVol", vol);
+                        break;
+                    default:
+                        current.masterMixer.SetFloat("MasterVol", value <= 0.01f ? -80f : vol);
+                        break;
+                }
+            }catch(System.Exception err)
+            {
+                Debug.LogError(err);
             }
         }
 
+        public static void PlayClip(AudioClip clip,float delay=0f) { PlayClip(current.sfx,clip,false,delay); }
         public static void PlayClip(Source source, AudioClip clip) { PlayClip(source, clip, false); }
-        public static void PlayClip(Source source, AudioClip clip, bool isLoop)
+        public static async Task PlayClip(Source source, AudioClip clip, bool isLoop, float delay=0f)
         {
+            Debug.Log($"PlayClip:{clip?.name} delay:{delay}");
             if (clip == null)
             {
                 Debug.LogError($"Try PlayClip but clip is null");
                 return;
             }
+            if (delay > 0f)
+                await Extension.Async.Delay(delay);
             var t = source;
             t.source.loop = isLoop;
             if (t.type == AudioChannel.SFX && isLoop == false)

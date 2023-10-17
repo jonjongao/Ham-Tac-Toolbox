@@ -15,15 +15,82 @@ public class ExtendedToggleGroup : ToggleGroup
     public int selectedIndex => m_selectedIndex;
     List<Toggle> m_childToggles;
 
+    bool m_defaultAllowSwitchOff;
+
     protected override void Awake()
     {
         m_childToggles = GetComponentsInChildren<Toggle>().ToList();
+        m_defaultAllowSwitchOff = allowSwitchOff;
         base.Awake();
+    }
+
+    public void CustomSetToggleValue(int index,bool sendCallback=true)
+    {
+        allowSwitchOff = true;
+
+        if (sendCallback)
+        {
+            for (var i = 0; i < m_childToggles.Count; i++)
+            {
+                if(i==index)
+                {
+                    m_childToggles[i].isOn = true;
+                    m_childToggles[i].onValueChanged?.Invoke(true);
+                }
+                else
+                {
+                    m_childToggles[i].isOn = false;
+                    m_childToggles[i].onValueChanged?.Invoke(false);
+                }
+              
+            }
+        }
+        else
+        {
+            for (var i = 0; i < m_childToggles.Count; i++)
+            {
+                if (i == index)
+                {
+                    m_childToggles[i].SetIsOnWithoutNotify(true);
+                }
+                else
+                {
+                    m_childToggles[i].SetIsOnWithoutNotify(false);
+                }
+            }
+        }
+
+        allowSwitchOff = m_defaultAllowSwitchOff;
+        m_selectedIndex = index;
+    }
+
+    public void CustomSetAllTogglesOff(bool sendCallback = true)
+    {
+        //bool oldAllowSwitchOff = allowSwitchOff;
+        allowSwitchOff= true;
+
+        if (sendCallback)
+        {
+            for (var i = 0; i < m_childToggles.Count; i++)
+            {
+                m_childToggles[i].isOn = false;
+                m_childToggles[i].onValueChanged?.Invoke(false);
+            }
+        }
+        else
+        {
+            for (var i = 0; i < m_childToggles.Count; i++)
+                m_childToggles[i].SetIsOnWithoutNotify(false);
+        }
+
+        allowSwitchOff = m_defaultAllowSwitchOff;
+        m_selectedIndex = -1;
     }
 
     protected override void OnEnable()
     {
         m_childToggles = GetComponentsInChildren<Toggle>().ToList();
+        CustomSetAllTogglesOff(true);
         for (int i = 0; i < m_childToggles.Count; i++)
         {
             if (i == m_selectIndexOnEnable)

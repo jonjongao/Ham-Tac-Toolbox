@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace HamTac
 {
-    [CreateAssetMenu(fileName = "GameObjectTable", menuName = "GameObjectLookupTable")]
+    [CreateAssetMenu(fileName = "GameObjectTable", menuName = "TBSF/LookupTable/GameObjectLookupTable")]
     public class GameObjectLookupTable : AssetLookupTable<GameObject>
     {
         public static GameObjectLookupTable FindByName(string value)

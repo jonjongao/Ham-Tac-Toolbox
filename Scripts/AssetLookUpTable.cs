@@ -9,7 +9,7 @@ using UnityEditor;
 
 namespace HamTac
 {
-    public class AssetLookupTable<T> : ScriptableObject
+    public class AssetLookupTable<T> : ScriptableObject where T : class
     {
         [SerializeField]
         string m_ID;
@@ -22,11 +22,13 @@ namespace HamTac
             try
             {
                 var obj = assets.Find(x => x.key.Equals(value)).value;
-                return obj;
+                return obj as T;
             }
-            catch (System.NullReferenceException)
+            catch (System.Exception e)
             {
-                return (T)new object();
+                //Debug.LogError("Following error has resolve");
+                Debug.LogWarning($"Failed to find asset of key:{value}");
+                return null;
             }
         }
     }

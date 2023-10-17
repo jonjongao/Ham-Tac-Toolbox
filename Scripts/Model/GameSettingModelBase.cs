@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 public class GameSettingModelBase
 {
     static GameSettingModelBase m_current;
-    public static GameSettingModelBase current
-    {
-        get
-        {
-            if (m_current == null)
-            {
-                m_current = new GameSettingModelBase();
-            }
-            return m_current;
-        }
-    }
+    //public static GameSettingModelBase current
+    //{
+    //    get
+    //    {
+    //        if (m_current == null)
+    //        {
+    //            m_current = new GameSettingModelBase();
+    //        }
+    //        return m_current;
+    //    }
+    //}
 
     [System.Serializable]
     public class Preference
@@ -248,6 +248,7 @@ public class GameSettingModelBase
         {
             JDebug.Log($"GameSetting Save Save setting failed, error: UnauthorizedAccessException");
         }
+        m_preference = data;
         OnPreferenceChange?.Invoke();
     }
 }
